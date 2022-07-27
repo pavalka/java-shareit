@@ -76,6 +76,10 @@ public class InMemoryUserStorage implements UserDao {
 
     @Override
     public Optional<User> update(User user) {
+        if (user == null) {
+            throw new NullPointerException("user = null");
+        }
+
         var wrappedUser = getUserById(user.getId());
 
         if (wrappedUser.isPresent()) {

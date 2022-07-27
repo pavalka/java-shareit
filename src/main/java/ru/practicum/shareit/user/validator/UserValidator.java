@@ -10,5 +10,6 @@ public class UserValidator {
         return name == null || name.isBlank();
     }
 
-    private UserValidator() {}
+    private UserValidator() {
+    }
 }

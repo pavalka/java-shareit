@@ -13,5 +13,6 @@ public class ItemValidator {
         return available == null;
     }
 
-    private ItemValidator() {}
+    private ItemValidator() {
+    }
 }

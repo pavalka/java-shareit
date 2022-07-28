@@ -18,7 +18,5 @@ public interface UserDao {
 
     Optional<User> updateNameAndEmail(long userId, String userName, String userEmail);
 
-    Optional<User> update(User user);
-
     void delete(long userId);
 }

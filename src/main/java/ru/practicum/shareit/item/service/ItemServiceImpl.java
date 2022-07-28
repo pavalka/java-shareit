@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.service;
 
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,40 +18,33 @@ import java.util.Collection;
 public class ItemServiceImpl implements ItemService {
     private final ItemDao itemDao;
     private final UserService userService;
-    private final ItemMapper mapper;
 
     @Override
     public Collection<ItemDto> getAllItemsForUser(long userId) {
         userService.getUserById(userId);
-        return mapper.mapItemsCollectionToItemDto(itemDao.getAllItemsByOwnerId(userId));
+        return ItemMapper.mapItemsCollectionToItemDto(itemDao.getAllItemsByOwnerId(userId));
     }
 
     @Override
     public ItemDto getItemById(long itemId) {
-        return mapper.mapItemToItemDto(itemDao.getItemById(itemId).orElseThrow(
+        return ItemMapper.mapItemToItemDto(itemDao.getItemById(itemId).orElseThrow(
                 () -> new ItemNotFoundException(String.format("Элемент с id = %d не найден", itemId))
         ));
     }
 
     @Override
-    public ItemDto createNewItem(long ownerId, ItemDto itemDto) {
-        if (itemDto == null) {
-            throw new NullPointerException("itemDto = null");
-        }
+    public ItemDto createNewItem(long ownerId, @NonNull ItemDto itemDto) {
         userService.getUserById(ownerId);
 
-        var item = mapper.mapItemDtoToItem(itemDto);
+        var item = ItemMapper.mapItemDtoToItem(itemDto);
 
         item.setOwnerId(ownerId);
-        return mapper.mapItemToItemDto(itemDao.save(item));
+        return ItemMapper.mapItemToItemDto(itemDao.save(item));
     }
 
     @Override
-    public ItemDto updateItem(long ownerId, ItemDto itemDto) {
+    public ItemDto updateItem(long ownerId, @NonNull ItemDto itemDto) {
         userService.getUserById(ownerId);
-        if (itemDto == null) {
-            throw new NullPointerException("itemDto = null");
-        }
 
         var item = itemDao.getItemById(itemDto.getId()).orElseThrow(
                 () -> new ItemNotFoundException(String.format("Элемент с id = %d не найден", itemDto.getId())));
@@ -70,13 +64,13 @@ public class ItemServiceImpl implements ItemService {
             item.setAvailable(itemDto.getAvailable());
         }
 
-        return mapper.mapItemToItemDto(itemDao.update(item).get());
+        return ItemMapper.mapItemToItemDto(itemDao.update(item).get());
     }
 
     @Override
     public Collection<ItemDto> findItemsByNameAndDescription(String text) {
         var foundItems = itemDao.findAvailableItemsByNameAndDescription(text);
 
-        return mapper.mapItemsCollectionToItemDto(foundItems);
+        return ItemMapper.mapItemsCollectionToItemDto(foundItems);
     }
 }

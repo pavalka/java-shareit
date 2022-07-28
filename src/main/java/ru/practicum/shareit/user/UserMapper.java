@@ -1,19 +1,17 @@
 package ru.practicum.shareit.user;
 
-import org.springframework.stereotype.Component;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-@Component
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class UserMapper {
-    public UserDto mapUserToUserDto(User user) {
-        if (user == null) {
-            return null;
-        }
-
+    public static UserDto mapUserToUserDto(@NonNull User user) {
         var userDto = new UserDto();
 
         userDto.setId(user.getId());
@@ -22,11 +20,7 @@ public class UserMapper {
         return userDto;
     }
 
-    public User mapUserDtoToUser(UserDto userDto) {
-        if (userDto == null) {
-            return null;
-        }
-
+    public static User mapUserDtoToUser(@NonNull UserDto userDto) {
         var user = new User();
 
         user.setName(userDto.getName());
@@ -34,10 +28,7 @@ public class UserMapper {
         return user;
     }
 
-    public Collection<UserDto> mapUserCollectionToUserDto(Collection<User> users) {
-        if (users == null) {
-            return null;
-        }
-        return users.stream().map(this::mapUserToUserDto).collect(Collectors.toCollection(ArrayList::new));
+    public static Collection<UserDto> mapUserCollectionToUserDto(@NonNull Collection<User> users) {
+        return users.stream().map(UserMapper::mapUserToUserDto).collect(Collectors.toCollection(ArrayList::new));
     }
 }

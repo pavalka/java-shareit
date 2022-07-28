@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.repository;
 
+import lombok.NonNull;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.item.Item;
 
@@ -27,22 +28,14 @@ public class InMemoryItemStorage implements ItemDao {
     }
 
     @Override
-    public Item save(Item item) {
-        if (item == null) {
-            throw new NullPointerException("item = null");
-        }
-
+    public Item save(@NonNull Item item) {
         item.setId(getNextItemId());
         itemStorage.put(item.getId(), item);
         return item;
     }
 
     @Override
-    public Optional<Item> update(Item item) {
-        if (item == null) {
-            throw new NullPointerException("item = null");
-        }
-
+    public Optional<Item> update(@NonNull Item item) {
         var wrappedItem = getItemById(item.getId());
 
         if (wrappedItem.isPresent()) {

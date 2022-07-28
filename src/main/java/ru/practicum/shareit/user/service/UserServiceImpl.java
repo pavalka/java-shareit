@@ -1,5 +1,6 @@
 package ru.practicum.shareit.user.service;
 
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,33 +17,24 @@ import java.util.Optional;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UserServiceImpl implements UserService {
     private final UserDao userDao;
-    private final UserMapper mapper;
 
     @Override
     public UserDto getUserById(long userId) {
-        return mapper.mapUserToUserDto(
+        return UserMapper.mapUserToUserDto(
                 userDao.getUserById(userId)
                 .orElseThrow(() -> new UserNotFoundException(String.format("Пользователь с id = %d не найден", userId)))
         );
     }
 
     @Override
-    public UserDto createUser(UserDto userDto) {
-        if (userDto == null) {
-            throw new NullPointerException("userDto = null");
-        }
+    public UserDto createUser(@NonNull UserDto userDto) {
+        var user = userDao.save(UserMapper.mapUserDtoToUser(userDto));
 
-        var user = userDao.save(mapper.mapUserDtoToUser(userDto));
-
-        return mapper.mapUserToUserDto(user);
+        return UserMapper.mapUserToUserDto(user);
     }
 
     @Override
-    public UserDto updateUser(UserDto userDto) {
-        if (userDto == null) {
-            throw new NullPointerException("userDto = null");
-        }
-
+    public UserDto updateUser(@NonNull UserDto userDto) {
         Optional<User> wrappedUser = Optional.empty();
 
         if (userDto.getName() != null && userDto.getEmail() != null) {
@@ -52,7 +44,7 @@ public class UserServiceImpl implements UserService {
         } else if (userDto.getEmail() != null) {
             wrappedUser = userDao.updateEmail(userDto.getId(), userDto.getEmail());
         }
-        return mapper.mapUserToUserDto(wrappedUser.orElseThrow(() -> new UserNotFoundException(
+        return UserMapper.mapUserToUserDto(wrappedUser.orElseThrow(() -> new UserNotFoundException(
                 String.format("Пользователь с id = %d не найден", userDto.getId()))));
     }
 
@@ -63,6 +55,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Collection<UserDto> getAllUsers() {
-        return mapper.mapUserCollectionToUserDto(userDao.getAllUsers());
+        return UserMapper.mapUserCollectionToUserDto(userDao.getAllUsers());
     }
 }

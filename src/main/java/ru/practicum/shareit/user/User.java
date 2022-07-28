@@ -1,14 +1,14 @@
 package ru.practicum.shareit.user;
 
 import lombok.Data;
-
-import java.util.HashSet;
-import java.util.Set;
+import lombok.EqualsAndHashCode;
 
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class User {
     private long id;
     private String name;
+
+    @EqualsAndHashCode.Include
     private String email;
-    private final Set<Long> itemsList = new HashSet<>();
 }

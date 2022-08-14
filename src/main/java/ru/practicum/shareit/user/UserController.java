@@ -26,24 +26,24 @@ public class UserController {
 
     @GetMapping
     public Collection<UserDto> getAllUsers() {
-        return userService.getAllUsers();
+        return UserMapper.mapUserCollectionToUserDto(userService.getAllUsers());
     }
 
     @GetMapping("/{userId}")
     public UserDto getUserById(@PathVariable("userId") long userId) {
-        return userService.getUserById(userId);
+        return UserMapper.mapUserToUserDto(userService.getUserById(userId));
     }
 
     @PostMapping
     public UserDto createNewUser(@Validated(CreateUserValidationGroup.class) @RequestBody UserDto userDto) {
-        return userService.createUser(userDto);
+        return UserMapper.mapUserToUserDto(userService.createUser(UserMapper.mapUserDtoToUser(userDto)));
     }
 
     @PatchMapping("/{userId}")
     public UserDto updateUser(@PathVariable("userId") long userId,
                               @Validated(UpdateUserValidationGroup.class) @RequestBody UserDto userDto) {
         userDto.setId(userId);
-        return userService.updateUser(userDto);
+        return UserMapper.mapUserToUserDto(userService.updateUser(UserMapper.mapUserDtoToUser(userDto)));
     }
 
     @DeleteMapping("/{userId}")

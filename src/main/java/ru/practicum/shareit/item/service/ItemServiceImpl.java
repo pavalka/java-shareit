@@ -4,13 +4,22 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.item.ItemMapper;
-import ru.practicum.shareit.item.dto.ItemDto;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.Booking;
+import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.item.Comment;
+import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.item.exceptions.BookingToCreateCommentNotFoundException;
 import ru.practicum.shareit.item.exceptions.ItemNotFoundException;
 import ru.practicum.shareit.item.exceptions.UserIsNotItemOwnerException;
+import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemDao;
 import ru.practicum.shareit.user.service.UserService;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 
 @Service
@@ -18,59 +27,139 @@ import java.util.Collection;
 public class ItemServiceImpl implements ItemService {
     private final ItemDao itemDao;
     private final UserService userService;
+    private final BookingRepository bookingRepository;
+    private final CommentRepository commentRepository;
 
     @Override
-    public Collection<ItemDto> getAllItemsForUser(long userId) {
-        userService.getUserById(userId);
-        return ItemMapper.mapItemsCollectionToItemDto(itemDao.getAllItemsByOwnerId(userId));
+    @Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
+    public Collection<Item> getAllItemsForUser(long userId) {
+        var user = userService.getUserById(userId);
+        var items = user.getItems(); //itemDao.findAllByOwnerIdOrderById(userId);
+        var refTime = LocalDateTime.now();
+
+        for (Item currentItem : items) {
+            addBookingInfo(currentItem, refTime);
+            currentItem.getComments();
+        }
+
+        return items;
     }
 
     @Override
-    public ItemDto getItemById(long itemId) {
-        return ItemMapper.mapItemToItemDto(itemDao.getItemById(itemId).orElseThrow(
-                () -> new ItemNotFoundException(String.format("Элемент с id = %d не найден", itemId))
-        ));
+    @Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
+    public Item getItemById(long itemId) {
+        return itemDao.findById(itemId).orElseThrow(
+                () -> new ItemNotFoundException(String.format("Элемент с id = %d не найден", itemId)));
     }
 
     @Override
-    public ItemDto createNewItem(long ownerId, @NonNull ItemDto itemDto) {
-        userService.getUserById(ownerId);
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public Item createNewItem(long ownerId, Item item) {
+        var user = userService.getUserById(ownerId);
 
-        var item = ItemMapper.mapItemDtoToItem(itemDto);
-
-        item.setOwnerId(ownerId);
-        return ItemMapper.mapItemToItemDto(itemDao.save(item));
+        item.setOwner(user);
+        return itemDao.save(item);
     }
 
     @Override
-    public ItemDto updateItem(long ownerId, @NonNull ItemDto itemDto) {
-        userService.getUserById(ownerId);
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public Item updateItem(long ownerId, Item item) {
+        var user = userService.getUserById(ownerId);
 
-        var item = itemDao.getItemById(itemDto.getId()).orElseThrow(
-                () -> new ItemNotFoundException(String.format("Элемент с id = %d не найден", itemDto.getId())));
+        var updatedItem = getItemById(item.getId());
 
-        if (item.getOwnerId() != ownerId) {
+        if (!updatedItem.getOwner().equals(user)) {
             throw new UserIsNotItemOwnerException(String.format("Пользователь с id = %d не владелец элемента с id = %d",
-                    ownerId, itemDto.getId()));
+                    ownerId, updatedItem.getId()));
         }
 
-        if (itemDto.getName() != null) {
-            item.setName(itemDto.getName());
+        if (item.getName() != null) {
+            updatedItem.setName(item.getName());
         }
-        if (itemDto.getDescription() != null) {
-            item.setDescription(itemDto.getDescription());
+        if (item.getDescription() != null) {
+            updatedItem.setDescription(item.getDescription());
         }
-        if (itemDto.getAvailable() != null) {
-            item.setAvailable(itemDto.getAvailable());
+        if (item.getAvailable() != null) {
+            updatedItem.setAvailable(item.getAvailable());
         }
 
-        return ItemMapper.mapItemToItemDto(itemDao.update(item).get());
+        return updatedItem;
     }
 
     @Override
-    public Collection<ItemDto> findItemsByNameAndDescription(String text) {
-        var foundItems = itemDao.findAvailableItemsByNameAndDescription(text);
+    @Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
+    public Collection<Item> findItemsByNameAndDescription(String text) {
+        if (text.isBlank()) {
+            return new ArrayList<>();
+        }
+        return itemDao.findByNameOrDescriptionLikeAndIsAvailableTrue(text);
+    }
 
-        return ItemMapper.mapItemsCollectionToItemDto(foundItems);
+    @Override
+    @Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
+    public Item getItemById(long userId, long itemId) {
+        var user = userService.getUserById(userId);
+        var item = getItemById(itemId);
+
+        if (item.getOwner().equals(user)) {
+            addBookingInfo(item, LocalDateTime.now());
+        }
+        item.getComments();
+        return item;
+    }
+
+    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public Comment createComment(long userId, long itemId, String text) {
+        var creatingTime = LocalDateTime.now();
+        var wrappedBooking = bookingRepository.findByItemIdAndUserIdAndEndTimeBefore(itemId, userId,
+                creatingTime);
+
+        if (wrappedBooking.isEmpty()) {
+            throw new BookingToCreateCommentNotFoundException(String.format("Бронирование с параметрами userId = %d, " +
+                    "itemId = %d, endTime < %3$tFT%3%tT", userId, itemId, creatingTime));
+        }
+
+        var comment = new Comment(null, wrappedBooking.get().getUser(), wrappedBooking.get().getItem(), creatingTime,
+                text);
+
+        return commentRepository.save(comment);
+    }
+
+    @Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
+    private Item addBookingInfo(@NonNull Item item, @NonNull LocalDateTime referenceTime) {
+        Collection<Booking> bookings = bookingRepository.findAllByItem(item);
+        var bookingInfo = getLastNextBooking(bookings, referenceTime);
+
+        item.setLastBooking(bookingInfo.getLastBooking());
+        item.setNextBooking(bookingInfo.getNextBooking());
+
+        return item;
+    }
+
+    private BookingInfo getLastNextBooking(@NonNull Collection<Booking> bookings,
+                                           @NonNull LocalDateTime referenceTime) {
+        var bookingInfo = new BookingInfo();
+        Duration nextBookingMinDiff = Duration.between(referenceTime, LocalDateTime.MAX);
+        Duration lastBookingMinDiff = Duration.between(LocalDateTime.MIN, referenceTime);
+
+        for (Booking currentBooking : bookings) {
+            Duration diff;
+
+            if (currentBooking.getEndTime().isBefore(referenceTime)) {
+                diff = Duration.between(currentBooking.getEndTime(), referenceTime);
+                if (diff.compareTo(lastBookingMinDiff) < 0) {
+                    lastBookingMinDiff = diff;
+                    bookingInfo.setLastBooking(currentBooking);
+                }
+            } else if (currentBooking.getStartTime().isAfter(referenceTime)) {
+                diff = Duration.between(referenceTime, currentBooking.getStartTime());
+                if (diff.compareTo(nextBookingMinDiff) < 0) {
+                    nextBookingMinDiff = diff;
+                    bookingInfo.setNextBooking(currentBooking);
+                }
+            }
+        }
+        return bookingInfo;
     }
 }

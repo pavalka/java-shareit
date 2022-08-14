@@ -11,13 +11,20 @@ import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ItemMapper {
-    public static ItemDto mapItemToItemDto(@NonNull Item item) {
+    public static ItemDto mapItemToItemDto(Item item) {
+        if (item == null) {
+            return null;
+        }
+
         var itemDto = new ItemDto();
 
         itemDto.setId(item.getId());
         itemDto.setName(item.getName());
         itemDto.setDescription(item.getDescription());
-        itemDto.setAvailable(item.isAvailable());
+        itemDto.setAvailable(item.getAvailable());
+        itemDto.setLastBooking(BookingInfoMapper.mapBookingToBookingInfoDto(item.getLastBooking()));
+        itemDto.setNextBooking(BookingInfoMapper.mapBookingToBookingInfoDto(item.getNextBooking()));
+        itemDto.setComments(CommentMapper.mapCommentsToDto(item.getComments()));
         return itemDto;
     }
 

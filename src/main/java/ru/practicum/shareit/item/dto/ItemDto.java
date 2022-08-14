@@ -7,6 +7,7 @@ import ru.practicum.shareit.item.validation.UpdateItemValidationGroup;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.Collection;
 
 @Data
 public class ItemDto {
@@ -22,4 +23,10 @@ public class ItemDto {
 
     @NotNull(groups = CreateItemValidationGroup.class)
     private Boolean available;
+
+    private BookingInfoDto lastBooking;
+
+    private BookingInfoDto nextBooking;
+
+    private Collection<CommentDto> comments;
 }

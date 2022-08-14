@@ -39,7 +39,6 @@ public class ItemServiceImpl implements ItemService {
 
         for (Item currentItem : items) {
             addBookingInfo(currentItem, refTime);
-            currentItem.getComments();
         }
 
         return items;
@@ -104,7 +103,6 @@ public class ItemServiceImpl implements ItemService {
         if (item.getOwner().equals(user)) {
             addBookingInfo(item, LocalDateTime.now());
         }
-        item.getComments();
         return item;
     }
 

@@ -3,6 +3,7 @@ package ru.practicum.shareit.item;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.user.User;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,5 +30,19 @@ public class CommentMapper {
             return null;
         }
         return comments.stream().map(CommentMapper::mapCommentToDto).collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    public static Comment mapDtoToComment(CommentDto commentDto, Item item, User user) {
+        if (commentDto == null) {
+            return null;
+        }
+
+        var comment = new Comment();
+
+        comment.setUser(user);
+        comment.setItem(item);
+        comment.setText(commentDto.getText());
+
+        return comment;
     }
 }

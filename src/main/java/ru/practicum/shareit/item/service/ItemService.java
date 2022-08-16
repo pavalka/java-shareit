@@ -2,21 +2,22 @@ package ru.practicum.shareit.item.service;
 
 import ru.practicum.shareit.item.Comment;
 import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.user.User;
 
 import java.util.Collection;
 
 public interface ItemService {
-    Collection<Item> getAllItemsForUser(long userId);
+    Collection<Item> getAllItemsForUser(User user);
 
     Item getItemById(long itemId);
 
-    Item createNewItem(long ownerId, Item item);
+    Item createNewItem(Item item);
 
-    Item updateItem(long ownerId, Item item);
+    Item updateItem(Item item, User user);
 
     Collection<Item> findItemsByNameAndDescription(String text);
 
-    Item getItemById(long userId, long itemId);
+    Item getItemByIdAndUser(User user, long itemId);
 
-    Comment createComment(long userId, long itemId, String text);
+    Comment createComment(Comment comment);
 }

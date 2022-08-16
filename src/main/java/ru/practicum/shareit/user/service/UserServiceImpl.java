@@ -17,7 +17,7 @@ public class UserServiceImpl implements UserService {
     private final UserDao userDao;
 
     @Override
-    @Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public User getUserById(long userId) {
         return userDao.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(String.format("Пользователь с id = %d не найден", userId)));

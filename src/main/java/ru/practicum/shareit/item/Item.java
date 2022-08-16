@@ -40,7 +40,7 @@ public class Item {
     private User owner;
 
     @Column(name = "is_available", nullable = false)
-    Boolean available;
+    private Boolean available;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "item")
     private List<Comment> comments;

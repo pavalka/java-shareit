@@ -15,7 +15,7 @@ import ru.practicum.shareit.item.exceptions.ItemNotFoundException;
 import ru.practicum.shareit.item.exceptions.UserIsNotItemOwnerException;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemDao;
-import ru.practicum.shareit.user.service.UserService;
+import ru.practicum.shareit.user.User;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -26,15 +26,13 @@ import java.util.Collection;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ItemServiceImpl implements ItemService {
     private final ItemDao itemDao;
-    private final UserService userService;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
 
     @Override
     @Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
-    public Collection<Item> getAllItemsForUser(long userId) {
-        var user = userService.getUserById(userId);
-        var items = user.getItems(); //itemDao.findAllByOwnerIdOrderById(userId);
+    public Collection<Item> getAllItemsForUser(@NonNull User user) {
+        var items = user.getItems();
         var refTime = LocalDateTime.now();
 
         for (Item currentItem : items) {
@@ -53,23 +51,18 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public Item createNewItem(long ownerId, Item item) {
-        var user = userService.getUserById(ownerId);
-
-        item.setOwner(user);
+    public Item createNewItem(Item item) {
         return itemDao.save(item);
     }
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public Item updateItem(long ownerId, Item item) {
-        var user = userService.getUserById(ownerId);
-
+    public Item updateItem(Item item, User user) {
         var updatedItem = getItemById(item.getId());
 
         if (!updatedItem.getOwner().equals(user)) {
             throw new UserIsNotItemOwnerException(String.format("Пользователь с id = %d не владелец элемента с id = %d",
-                    ownerId, updatedItem.getId()));
+                    user.getId(), updatedItem.getId()));
         }
 
         if (item.getName() != null) {
@@ -96,8 +89,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
-    public Item getItemById(long userId, long itemId) {
-        var user = userService.getUserById(userId);
+    public Item getItemByIdAndUser(User user, long itemId) {
         var item = getItemById(itemId);
 
         if (item.getOwner().equals(user)) {
@@ -108,31 +100,24 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public Comment createComment(long userId, long itemId, String text) {
-        var creatingTime = LocalDateTime.now();
-        var wrappedBooking = bookingRepository.findByItemIdAndUserIdAndEndTimeBefore(itemId, userId,
-                creatingTime);
+    public Comment createComment(Comment comment) {
+        var wrappedBooking = bookingRepository.findByItemAndUserAndEndTimeBefore(comment.getItem(),
+                comment.getUser(), comment.getCreationDate());
 
         if (wrappedBooking.isEmpty()) {
             throw new BookingToCreateCommentNotFoundException(String.format("Бронирование с параметрами userId = %d, " +
-                    "itemId = %d, endTime < %3$tFT%3%tT", userId, itemId, creatingTime));
+                    "itemId = %d, endTime < %3$tFT%3$%tT не найдено", comment.getUser().getId(), comment.getItem()
+                            .getId(), comment.getCreationDate()));
         }
-
-        var comment = new Comment(null, wrappedBooking.get().getUser(), wrappedBooking.get().getItem(), creatingTime,
-                text);
-
         return commentRepository.save(comment);
     }
 
-    @Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
-    private Item addBookingInfo(@NonNull Item item, @NonNull LocalDateTime referenceTime) {
+    private void addBookingInfo(@NonNull Item item, @NonNull LocalDateTime referenceTime) {
         Collection<Booking> bookings = bookingRepository.findAllByItem(item);
         var bookingInfo = getLastNextBooking(bookings, referenceTime);
 
         item.setLastBooking(bookingInfo.getLastBooking());
         item.setNextBooking(bookingInfo.getNextBooking());
-
-        return item;
     }
 
     private BookingInfo getLastNextBooking(@NonNull Collection<Booking> bookings,

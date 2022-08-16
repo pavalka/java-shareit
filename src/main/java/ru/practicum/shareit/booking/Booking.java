@@ -44,7 +44,7 @@ public class Booking {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 10)
-    private BookingStatus status;
+    private BookingStatus status = BookingStatus.WAITING;
 
     @Override
     public int hashCode() {

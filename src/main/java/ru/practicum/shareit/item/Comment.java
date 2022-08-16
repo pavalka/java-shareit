@@ -38,9 +38,9 @@ public class Comment {
     private Item item;
 
     @Column(name = "create_time", nullable = false)
-    private LocalDateTime creationDate;
+    private LocalDateTime creationDate = LocalDateTime.now();
 
-    @Column(name = "text", nullable = false)
+    @Column(name = "text", nullable = false, length = 1024)
     private String text;
 
     @Override

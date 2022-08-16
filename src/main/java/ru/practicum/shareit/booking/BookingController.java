@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.booking.dto.BookingIncomingDto;
 import ru.practicum.shareit.booking.dto.BookingOutgoingDto;
-import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.booking.service.MainBookingService;
 
 import java.util.Collection;

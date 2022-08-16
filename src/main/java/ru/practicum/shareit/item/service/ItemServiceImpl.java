@@ -106,7 +106,7 @@ public class ItemServiceImpl implements ItemService {
 
         if (wrappedBooking.isEmpty()) {
             throw new BookingToCreateCommentNotFoundException(String.format("Бронирование с параметрами userId = %d, " +
-                    "itemId = %d, endTime < %3$tFT%3$%tT не найдено", comment.getUser().getId(), comment.getItem()
+                    "itemId = %d, endTime < %3$tFT%3$tT не найдено", comment.getUser().getId(), comment.getItem()
                             .getId(), comment.getCreationDate()));
         }
         return commentRepository.save(comment);

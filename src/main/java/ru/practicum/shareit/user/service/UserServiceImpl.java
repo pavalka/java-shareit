@@ -3,50 +3,53 @@ package ru.practicum.shareit.user.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.UserMapper;
+import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.exceptions.UserNotFoundException;
 import ru.practicum.shareit.user.repository.UserDao;
 
 import java.util.Collection;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UserServiceImpl implements UserService {
     private final UserDao userDao;
 
     @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
-    public User getUserById(long userId) {
-        return userDao.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(String.format("Пользователь с id = %d не найден", userId)));
+    public UserDto getUserById(long userId) {
+        return UserMapper.mapUserToUserDto(userDao.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(String.format("Пользователь с id = %d не найден", userId))));
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
-    public User createUser(User user) {
-        return userDao.save(user);
+    @Transactional
+    public UserDto createUser(UserDto userDto) {
+        var user = UserMapper.mapUserDtoToUser(userDto);
+
+        return UserMapper.mapUserToUserDto(userDao.save(user));
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
-    public User updateUser(User user) {
-        User updatedUser = userDao.findById(user.getId()).orElseThrow(() -> new UserNotFoundException(
-                String.format("Пользователь с id = %d не найден", user.getId())));
+    @Transactional
+    public UserDto updateUser(UserDto userDto) {
+        User updatedUser = userDao.findById(userDto.getId()).orElseThrow(() -> new UserNotFoundException(
+                String.format("Пользователь с id = %d не найден", userDto.getId())));
 
-        if (user.getName() != null) {
-            updatedUser.setName(user.getName());
+        if (userDto.getName() != null) {
+            updatedUser.setName(userDto.getName());
         }
-        if (user.getEmail() != null) {
-            updatedUser.setEmail(user.getEmail());
+        if (userDto.getEmail() != null) {
+            updatedUser.setEmail(userDto.getEmail());
         }
 
-        return updatedUser;
+        return UserMapper.mapUserToUserDto(updatedUser);
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Transactional
     public void deleteUser(long userId) {
         var user = userDao.findById(userId).orElseThrow(() -> new UserNotFoundException(
                         String.format("Пользователь с id = %d не найден", userId)));
@@ -54,8 +57,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
-    public Collection<User> getAllUsers() {
-        return userDao.findAll();
+    public Collection<UserDto> getAllUsers() {
+        return UserMapper.mapUserCollectionToUserDto(userDao.findAll());
     }
 }

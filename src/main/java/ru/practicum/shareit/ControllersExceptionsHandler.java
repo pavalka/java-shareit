@@ -3,6 +3,7 @@ package ru.practicum.shareit;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.MissingRequestHeaderException;
@@ -23,13 +24,14 @@ import ru.practicum.shareit.item.exceptions.ItemNotFoundException;
 import ru.practicum.shareit.item.exceptions.UserIsNotItemOwnerException;
 import ru.practicum.shareit.user.exceptions.UserNotFoundException;
 
+import java.util.Map;
+
 @RestControllerAdvice
 @Slf4j
 public class ControllersExceptionsHandler {
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler
-    public ErrorMessage handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex,
-                                                                  WebRequest webRequest) {
+    public ResponseEntity<Map<String, String>>
+    handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex, WebRequest webRequest) {
         String errorMsg;
 
         if (ex.getParameter().getParameterType() == BookingState.class) {
@@ -39,51 +41,47 @@ public class ControllersExceptionsHandler {
                     .getName();
         }
         logWarn(ex);
-        return new ErrorMessage(errorMsg);
+        return new ResponseEntity<>(Map.of("error", errorMsg), HttpStatus.BAD_REQUEST);
     }
 
-    @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler({UserNotFoundException.class, ItemNotFoundException.class, UserIsNotItemOwnerException.class,
                        ItemBookedByItsOwnerException.class, BookingNotFoundException.class})
-    public ErrorMessage handleNotFoundExceptions(RuntimeException ex) {
+    public ResponseEntity<Map<String, String>> handleNotFoundExceptions(RuntimeException ex) {
         logWarn(ex);
-        return new ErrorMessage(ex.getMessage());
+        return new ResponseEntity<>(Map.of("error", ex.getMessage()), HttpStatus.NOT_FOUND);
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({MethodArgumentNotValidException.class})
-    public ErrorMessage handleValidationException(MethodArgumentNotValidException ex) {
+    public ResponseEntity<Map<String, String>> handleValidationException(MethodArgumentNotValidException ex) {
         logWarn(ex);
-        return new ErrorMessage("Field " + ex.getFieldError().getField() + "has an invalid value");
+        return new ResponseEntity<>(Map.of("error", "Field " + ex.getFieldError().getField() + "has an invalid value"),
+                HttpStatus.BAD_REQUEST);
     }
 
-    @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler({DataIntegrityViolationException.class})
-    public ErrorMessage handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
+    public ResponseEntity<Map<String, String>> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
         logWarn(ex);
-        return new ErrorMessage("data is not correct");
+        return new ResponseEntity<>(Map.of("error", "data is not correct"), HttpStatus.CONFLICT);
     }
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({BookingToCreateCommentNotFoundException.class, IllegalBookingApproveException.class,
                        BookingTimeConflictsException.class, BookingNotAvailableItemException.class})
-    public ErrorMessage handleOtherBadRequestExceptions(RuntimeException ex) {
+    public ResponseEntity<Map<String, String>> handleOtherBadRequestExceptions(RuntimeException ex) {
         logWarn(ex);
-        return new ErrorMessage(ex.getMessage());
+        return new ResponseEntity<>(Map.of("error", ex.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({MissingRequestHeaderException.class, MissingPathVariableException.class})
-    public ErrorMessage handleUnavailableRequestData(MissingRequestValueException ex) {
+    public ResponseEntity<Map<String, String>> handleUnavailableRequestData(MissingRequestValueException ex) {
         logWarn(ex);
-        return new ErrorMessage("bad request");
+        return new ResponseEntity<>(Map.of("error", "bad request"), HttpStatus.BAD_REQUEST);
     }
 
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler
-    public ErrorMessage handleOtherExceptions(Throwable ex) {
+    public ResponseEntity<Map<String, String>> handleOtherExceptions(Throwable ex) {
         logError(ex);
-        return new ErrorMessage("Internal server error");
+        return new ResponseEntity<>(Map.of("error", "Internal server error"), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     private void logWarn(Throwable ex) {

@@ -14,49 +14,50 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.service.MainItemService;
+import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.validation.CreateItemValidationGroup;
 import ru.practicum.shareit.item.validation.UpdateItemValidationGroup;
 
+import javax.validation.Valid;
 import java.util.Collection;
 
 @RestController
 @RequestMapping("/items")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ItemController {
-    private final MainItemService mainItemService;
+    private final ItemService itemService;
 
     @GetMapping("/{itemId}")
     public ItemDto getItemById(@RequestHeader("X-Sharer-User-Id") long userId, @PathVariable("itemId") long itemId) {
-        return mainItemService.getItemByIdAndUser(userId, itemId);
+        return itemService.getItemByIdAndUser(userId, itemId);
     }
 
     @GetMapping
     public Collection<ItemDto> getItemsByUserId(@RequestHeader("X-Sharer-User-Id") long userId) {
-        return mainItemService.getAllItemsForUser(userId);
+        return itemService.getAllItemsForUser(userId);
     }
 
     @PostMapping
     public ItemDto createNewItem(@RequestHeader("X-Sharer-User-Id") long ownerId,
                                  @Validated(CreateItemValidationGroup.class) @RequestBody ItemDto itemDto) {
-        return mainItemService.createNewItem(ownerId, itemDto);
+        return itemService.createNewItem(ownerId, itemDto);
     }
 
     @PatchMapping("/{itemId}")
     public ItemDto updateItem(@RequestHeader("X-Sharer-User-Id") long ownerId, @PathVariable("itemId") long itemId,
                               @Validated(UpdateItemValidationGroup.class) @RequestBody ItemDto itemDto) {
         itemDto.setId(itemId);
-        return mainItemService.updateItem(ownerId, itemDto);
+        return itemService.updateItem(itemDto, ownerId);
     }
 
     @GetMapping("/search")
     public Collection<ItemDto> findItemsByNameAndDescription(@RequestParam(name = "text") String text) {
-        return mainItemService.findItemsByNameAndDescription(text);
+        return itemService.findItemsByNameAndDescription(text);
     }
 
     @PostMapping("/{itemId}/comment")
     public CommentDto createComment(@RequestHeader("X-Sharer-User-Id") long userId, @PathVariable("itemId") long itemId,
-                                 @Validated @RequestBody CommentDto commentDto) {
-        return mainItemService.createComment(userId, itemId, commentDto);
+                                 @Valid @RequestBody CommentDto commentDto) {
+        return itemService.createComment(userId, itemId, commentDto);
     }
 }

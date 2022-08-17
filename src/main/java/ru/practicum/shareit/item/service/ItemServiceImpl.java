@@ -4,18 +4,22 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.item.Comment;
+import ru.practicum.shareit.item.CommentMapper;
 import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.item.ItemMapper;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.exceptions.BookingToCreateCommentNotFoundException;
 import ru.practicum.shareit.item.exceptions.ItemNotFoundException;
 import ru.practicum.shareit.item.exceptions.UserIsNotItemOwnerException;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemDao;
 import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.exceptions.UserNotFoundException;
+import ru.practicum.shareit.user.repository.UserDao;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -23,15 +27,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ItemServiceImpl implements ItemService {
     private final ItemDao itemDao;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final UserDao userDao;
 
     @Override
-    @Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
-    public Collection<Item> getAllItemsForUser(@NonNull User user) {
+    public Collection<ItemDto> getAllItemsForUser(long userId) {
+        var user = getUserById(userId);
         var items = user.getItems();
         var refTime = LocalDateTime.now();
 
@@ -39,77 +45,75 @@ public class ItemServiceImpl implements ItemService {
             addBookingInfo(currentItem, refTime);
         }
 
-        return items;
+        return ItemMapper.mapItemsCollectionToItemDto(items);
+    }
+
+
+
+    @Override
+    @Transactional
+    public ItemDto createNewItem(long ownerId, ItemDto itemDto) {
+        var owner = getUserById(ownerId);
+        var item = ItemMapper.mapItemDtoToItem(itemDto, owner);
+        return ItemMapper.mapItemToItemDto(itemDao.save(item));
     }
 
     @Override
-    @Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
-    public Item getItemById(long itemId) {
-        return itemDao.findById(itemId).orElseThrow(
-                () -> new ItemNotFoundException(String.format("Элемент с id = %d не найден", itemId)));
-    }
+    @Transactional
+    public ItemDto updateItem(ItemDto itemDto, long userId) {
+        var updatedItem = getItemById(itemDto.getId());
 
-    @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
-    public Item createNewItem(Item item) {
-        return itemDao.save(item);
-    }
-
-    @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
-    public Item updateItem(Item item, User user) {
-        var updatedItem = getItemById(item.getId());
-
-        if (!updatedItem.getOwner().equals(user)) {
+        if (updatedItem.getOwner().getId() != userId) {
             throw new UserIsNotItemOwnerException(String.format("Пользователь с id = %d не владелец элемента с id = %d",
-                    user.getId(), updatedItem.getId()));
+                    userId, updatedItem.getId()));
         }
 
-        if (item.getName() != null) {
-            updatedItem.setName(item.getName());
+        if (itemDto.getName() != null) {
+            updatedItem.setName(itemDto.getName());
         }
-        if (item.getDescription() != null) {
-            updatedItem.setDescription(item.getDescription());
+        if (itemDto.getDescription() != null) {
+            updatedItem.setDescription(itemDto.getDescription());
         }
-        if (item.getAvailable() != null) {
-            updatedItem.setAvailable(item.getAvailable());
+        if (itemDto.getAvailable() != null) {
+            updatedItem.setAvailable(itemDto.getAvailable());
         }
 
-        return updatedItem;
+        return ItemMapper.mapItemToItemDto(updatedItem);
     }
 
     @Override
-    @Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
-    public Collection<Item> findItemsByNameAndDescription(String text) {
+    public Collection<ItemDto> findItemsByNameAndDescription(String text) {
         if (text.isBlank()) {
             return new ArrayList<>();
         }
-        return itemDao.findByNameOrDescriptionLikeAndIsAvailableTrue(text);
+        return ItemMapper.mapItemsCollectionToItemDto(itemDao.findByNameOrDescriptionLikeAndIsAvailableTrue(text));
     }
 
     @Override
-    @Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
-    public Item getItemByIdAndUser(User user, long itemId) {
+    public ItemDto getItemByIdAndUser(long userId, long itemId) {
         var item = getItemById(itemId);
 
-        if (item.getOwner().equals(user)) {
+        if (item.getOwner().getId() == userId) {
             addBookingInfo(item, LocalDateTime.now());
         }
-        return item;
+        return ItemMapper.mapItemToItemDto(item);
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
-    public Comment createComment(Comment comment) {
-        var wrappedBooking = bookingRepository.findByItemAndUserAndEndTimeBefore(comment.getItem(),
-                comment.getUser(), comment.getCreationDate());
+    @Transactional
+    public CommentDto createComment(long userId, long itemId, CommentDto commentDto) {
+        var user = getUserById(userId);
+        var item = getItemById(itemId);
+        var comment = CommentMapper.mapDtoToComment(commentDto, item, user);
+        var wrappedBooking = bookingRepository.findByItemAndUserAndEndTimeBefore(item, user,
+                comment.getCreationDate());
 
         if (wrappedBooking.isEmpty()) {
             throw new BookingToCreateCommentNotFoundException(String.format("Бронирование с параметрами userId = %d, " +
-                    "itemId = %d, endTime < %3$tFT%3$tT не найдено", comment.getUser().getId(), comment.getItem()
-                            .getId(), comment.getCreationDate()));
+                    "itemId = %d, endTime < %3$tFT%3$tT не найдено", user.getId(), item.getId(),
+                    comment.getCreationDate()));
         }
-        return commentRepository.save(comment);
+        return CommentMapper.mapCommentToDto(commentRepository.save(comment));
     }
 
     private void addBookingInfo(@NonNull Item item, @NonNull LocalDateTime referenceTime) {
@@ -144,5 +148,15 @@ public class ItemServiceImpl implements ItemService {
             }
         }
         return bookingInfo;
+    }
+
+    private User getUserById(long userId) {
+        return userDao.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(String.format("Пользователь с id = %d не найден", userId)));
+    }
+
+    private Item getItemById(long itemId) {
+        return itemDao.findById(itemId).orElseThrow(
+                () -> new ItemNotFoundException(String.format("Элемент с id = %d не найден", itemId)));
     }
 }

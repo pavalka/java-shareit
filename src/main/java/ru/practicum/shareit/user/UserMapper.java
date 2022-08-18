@@ -23,6 +23,7 @@ public class UserMapper {
     public static User mapUserDtoToUser(@NonNull UserDto userDto) {
         var user = new User();
 
+        user.setId(userDto.getId());
         user.setName(userDto.getName());
         user.setEmail(userDto.getEmail());
         return user;

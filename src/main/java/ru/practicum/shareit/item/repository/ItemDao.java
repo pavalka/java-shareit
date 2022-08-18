@@ -1,18 +1,14 @@
 package ru.practicum.shareit.item.repository;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import ru.practicum.shareit.item.Item;
 
-import java.util.Collection;
-import java.util.Optional;
+import java.util.List;
 
-public interface ItemDao {
-    Collection<Item> getAllItemsByOwnerId(long ownerId);
-
-    Optional<Item> getItemById(long itemId);
-
-    Item save(Item item);
-
-    Optional<Item> update(Item item);
-
-    Collection<Item> findAvailableItemsByNameAndDescription(String text);
+public interface ItemDao extends JpaRepository<Item, Long> {
+    @Query("SELECT i FROM Item i WHERE (LOWER(i.name) LIKE CONCAT('%', LOWER(:text), '%') OR LOWER(i.description) LIKE CONCAT('%', LOWER(:text), '%')) " +
+            "AND i.available=TRUE")
+    List<Item> findByNameOrDescriptionLikeAndIsAvailableTrue(@Param("text") String text);
 }

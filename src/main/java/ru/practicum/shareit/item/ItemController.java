@@ -12,11 +12,13 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.validation.CreateItemValidationGroup;
 import ru.practicum.shareit.item.validation.UpdateItemValidationGroup;
 
+import javax.validation.Valid;
 import java.util.Collection;
 
 @RestController
@@ -26,8 +28,8 @@ public class ItemController {
     private final ItemService itemService;
 
     @GetMapping("/{itemId}")
-    public ItemDto getItemById(@PathVariable("itemId") long itemId) {
-        return itemService.getItemById(itemId);
+    public ItemDto getItemById(@RequestHeader("X-Sharer-User-Id") long userId, @PathVariable("itemId") long itemId) {
+        return itemService.getItemByIdAndUser(userId, itemId);
     }
 
     @GetMapping
@@ -45,11 +47,17 @@ public class ItemController {
     public ItemDto updateItem(@RequestHeader("X-Sharer-User-Id") long ownerId, @PathVariable("itemId") long itemId,
                               @Validated(UpdateItemValidationGroup.class) @RequestBody ItemDto itemDto) {
         itemDto.setId(itemId);
-        return itemService.updateItem(ownerId, itemDto);
+        return itemService.updateItem(itemDto, ownerId);
     }
 
     @GetMapping("/search")
     public Collection<ItemDto> findItemsByNameAndDescription(@RequestParam(name = "text") String text) {
         return itemService.findItemsByNameAndDescription(text);
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDto createComment(@RequestHeader("X-Sharer-User-Id") long userId, @PathVariable("itemId") long itemId,
+                                 @Valid @RequestBody CommentDto commentDto) {
+        return itemService.createComment(userId, itemId, commentDto);
     }
 }

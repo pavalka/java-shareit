@@ -18,5 +18,6 @@ public class UserDto {
 
     @NotBlank(groups = CreateUserValidationGroup.class)
     @Email(groups = {CreateUserValidationGroup.class, UpdateUserValidationGroup.class})
+    @Size(min = 1, groups = UpdateUserValidationGroup.class)
     private String email;
 }

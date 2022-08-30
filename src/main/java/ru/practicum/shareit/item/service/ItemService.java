@@ -6,13 +6,13 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import java.util.Collection;
 
 public interface ItemService {
-    Collection<ItemDto> getAllItemsForUser(long userId);
+    Collection<ItemDto> getAllItemsForUser(long userId, long from, int size);
 
     ItemDto createNewItem(long ownerId, ItemDto itemDto);
 
     ItemDto updateItem(ItemDto itemDto, long userId);
 
-    Collection<ItemDto> findItemsByNameAndDescription(String text);
+    Collection<ItemDto> findItemsByNameAndDescription(String text, long from, int size);
 
     ItemDto getItemByIdAndUser(long userId, long itemId);
 

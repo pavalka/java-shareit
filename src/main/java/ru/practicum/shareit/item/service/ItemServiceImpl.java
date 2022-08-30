@@ -3,8 +3,10 @@ package ru.practicum.shareit.item.service;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.PageableByOffsetAndSize;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.CommentMapper;
@@ -17,6 +19,9 @@ import ru.practicum.shareit.item.exceptions.ItemNotFoundException;
 import ru.practicum.shareit.item.exceptions.UserIsNotItemOwnerException;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemDao;
+import ru.practicum.shareit.requests.ItemRequest;
+import ru.practicum.shareit.requests.exceptions.RequestNotFoundException;
+import ru.practicum.shareit.requests.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.exceptions.UserNotFoundException;
 import ru.practicum.shareit.user.repository.UserDao;
@@ -34,11 +39,13 @@ public class ItemServiceImpl implements ItemService {
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
     private final UserDao userDao;
+    private final ItemRequestRepository requestRepository;
 
     @Override
-    public Collection<ItemDto> getAllItemsForUser(long userId) {
+    public Collection<ItemDto> getAllItemsForUser(long userId, long from, int size) {
         var user = getUserById(userId);
-        var items = user.getItems();
+        var pageable = new PageableByOffsetAndSize(from, size, Sort.unsorted());
+        var items = itemDao.findAllByOwner(user, pageable);
         var refTime = LocalDateTime.now();
 
         for (Item currentItem : items) {
@@ -48,13 +55,19 @@ public class ItemServiceImpl implements ItemService {
         return ItemMapper.mapItemsCollectionToItemDto(items);
     }
 
-
-
     @Override
     @Transactional
     public ItemDto createNewItem(long ownerId, ItemDto itemDto) {
         var owner = getUserById(ownerId);
-        var item = ItemMapper.mapItemDtoToItem(itemDto, owner);
+        Item item;
+
+        if (itemDto.getRequestId() == null) {
+            item  = ItemMapper.mapItemDtoToItem(itemDto, owner);
+        } else {
+            var request = getRequestById(itemDto.getRequestId());
+
+            item = ItemMapper.mapItemDtoToItem(itemDto, owner, request);
+        }
         return ItemMapper.mapItemToItemDto(itemDao.save(item));
     }
 
@@ -82,11 +95,14 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Collection<ItemDto> findItemsByNameAndDescription(String text) {
+    public Collection<ItemDto> findItemsByNameAndDescription(String text, long from, int size) {
         if (text.isBlank()) {
             return new ArrayList<>();
         }
-        return ItemMapper.mapItemsCollectionToItemDto(itemDao.findByNameOrDescriptionLikeAndIsAvailableTrue(text));
+        return ItemMapper.mapItemsCollectionToItemDto(itemDao
+                .findByNameOrDescriptionLikeAndIsAvailableTrue(text,
+                        new PageableByOffsetAndSize(from, size, Sort.unsorted())
+                ));
     }
 
     @Override
@@ -158,5 +174,11 @@ public class ItemServiceImpl implements ItemService {
     private Item getItemById(long itemId) {
         return itemDao.findById(itemId).orElseThrow(
                 () -> new ItemNotFoundException(String.format("Элемент с id = %d не найден", itemId)));
+    }
+
+    private ItemRequest getRequestById(long requestId) {
+        return requestRepository.findById(requestId).orElseThrow(
+                () -> new RequestNotFoundException(String.format("Запрос с id = %d не найден", requestId))
+        );
     }
 }

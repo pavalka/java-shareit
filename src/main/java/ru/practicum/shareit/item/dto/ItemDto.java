@@ -6,6 +6,7 @@ import ru.practicum.shareit.item.validation.UpdateItemValidationGroup;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.util.Collection;
 
@@ -29,4 +30,7 @@ public class ItemDto {
     private BookingInfoDto nextBooking;
 
     private Collection<CommentDto> comments;
+
+    @Positive(groups = {CreateItemValidationGroup.class, UpdateItemValidationGroup.class})
+    private Long requestId;
 }

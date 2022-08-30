@@ -1,6 +1,6 @@
 package ru.practicum.shareit.booking.repository;
 
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,31 +14,31 @@ import java.util.List;
 import java.util.Optional;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
-    List<Booking> findAllByUser(User user, Sort sort);
+    List<Booking> findAllByUser(User user, Pageable pageable);
 
     @Query("SELECT b FROM Booking b WHERE b.user = :user AND CURRENT_TIMESTAMP BETWEEN b.startTime AND b.endTime")
-    List<Booking> findAllByUserAndStateIsCurrent(@Param("user") User user, Sort sort);
+    List<Booking> findAllByUserAndStateIsCurrent(@Param("user") User user, Pageable pageable);
 
     @Query("SELECT b FROM Booking b WHERE b.user = :user AND b.endTime < CURRENT_TIMESTAMP")
-    List<Booking> findAllByUserAndStateIsPast(@Param("user") User user, Sort sort);
+    List<Booking> findAllByUserAndStateIsPast(@Param("user") User user, Pageable pageable);
 
     @Query("SELECT b FROM Booking b WHERE b.user = :user AND b.startTime > CURRENT_TIMESTAMP")
-    List<Booking> findAllByUserAndStateIsFuture(@Param("user") User user, Sort sort);
+    List<Booking> findAllByUserAndStateIsFuture(@Param("user") User user, Pageable pageable);
 
-    List<Booking> findAllByUserAndStatus(User user, BookingStatus status, Sort sort);
+    List<Booking> findAllByUserAndStatus(User user, BookingStatus status, Pageable pageable);
 
-    List<Booking> findAllByItemOwner(User itemOwner, Sort sort);
+    List<Booking> findAllByItemOwner(User itemOwner, Pageable pageable);
 
     @Query("SELECT b FROM Booking b WHERE b.item.owner = :owner AND CURRENT_TIMESTAMP BETWEEN b.startTime AND b.endTime")
-    List<Booking> findAllByOwnerAndStateIsCurrent(@Param("owner") User itemOwner, Sort sort);
+    List<Booking> findAllByOwnerAndStateIsCurrent(@Param("owner") User itemOwner, Pageable pageable);
 
     @Query("SELECT b FROM Booking b WHERE b.item.owner = :owner AND b.endTime < CURRENT_TIMESTAMP")
-    List<Booking> findAllByOwnerAndStateIsPast(@Param("owner") User itemOwner, Sort sort);
+    List<Booking> findAllByOwnerAndStateIsPast(@Param("owner") User itemOwner, Pageable pageable);
 
     @Query("SELECT b FROM Booking b WHERE b.item.owner = :owner AND b.startTime > CURRENT_TIMESTAMP")
-    List<Booking> findAllByOwnerAndStateIsFuture(@Param("owner") User itemOwner, Sort sort);
+    List<Booking> findAllByOwnerAndStateIsFuture(@Param("owner") User itemOwner, Pageable pageable);
 
-    List<Booking> findAllByItemOwnerAndStatus(User itemOwner, BookingStatus status, Sort sort);
+    List<Booking> findAllByItemOwnerAndStatus(User itemOwner, BookingStatus status, Pageable pageable);
 
     @Query("SELECT b FROM Booking b WHERE b.id = :bookingId AND (b.user= :user OR b.item.owner = :user)")
     Optional<Booking> findByIdAndUserOrOwner(@Param("bookingId") long bookingId, @Param("user") User user);

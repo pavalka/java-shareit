@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.PageableByOffsetAndSize;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.BookingState;
@@ -48,33 +49,35 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public Collection<BookingOutgoingDto> getAllBookingsByUserAndState(long userId,
-                                                                       @NonNull BookingState bookingState) {
+                                                                       @NonNull BookingState bookingState,
+                                                                       long from,
+                                                                       int size) {
         var user = getUserById(userId);
-        var sort = Sort.by(Sort.Direction.DESC, "startTime");
+        var pageable = new PageableByOffsetAndSize(from, size, Sort.by(Sort.Direction.DESC, "startTime"));
 
         switch (bookingState) {
             case ALL:
-                return BookingMapper.mapBookingCollectionToDto(bookingRepository.findAllByUser(user, sort));
+                return BookingMapper.mapBookingCollectionToDto(bookingRepository.findAllByUser(user, pageable));
 
             case PAST:
                 return BookingMapper.mapBookingCollectionToDto(bookingRepository.findAllByUserAndStateIsPast(user,
-                        sort));
+                        pageable));
 
             case FUTURE:
                 return BookingMapper.mapBookingCollectionToDto(bookingRepository.findAllByUserAndStateIsFuture(user,
-                        sort));
+                        pageable));
 
             case CURRENT:
                 return BookingMapper.mapBookingCollectionToDto(bookingRepository.findAllByUserAndStateIsCurrent(user,
-                        sort));
+                        pageable));
 
             case WAITING:
                 return BookingMapper.mapBookingCollectionToDto(bookingRepository.findAllByUserAndStatus(user,
-                        BookingStatus.WAITING, sort));
+                        BookingStatus.WAITING, pageable));
 
             case REJECTED:
                 return BookingMapper.mapBookingCollectionToDto(bookingRepository.findAllByUserAndStatus(user,
-                        BookingStatus.REJECTED, sort));
+                        BookingStatus.REJECTED, pageable));
 
             default:
                 return new ArrayList<>();
@@ -83,33 +86,34 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public Collection<BookingOutgoingDto> getAllBookingsByOwnerAndState(long ownerId,
-                                                                        @NonNull BookingState bookingState) {
+                                                                        @NonNull BookingState bookingState,
+                                                                        long from, int size) {
         var owner = getUserById(ownerId);
-        var sort = Sort.by(Sort.Direction.DESC, "startTime");
+        var pageable = new PageableByOffsetAndSize(from, size, Sort.by(Sort.Direction.DESC, "startTime"));
 
         switch (bookingState) {
             case ALL:
-                return BookingMapper.mapBookingCollectionToDto(bookingRepository.findAllByItemOwner(owner, sort));
+                return BookingMapper.mapBookingCollectionToDto(bookingRepository.findAllByItemOwner(owner, pageable));
 
             case PAST:
                 return BookingMapper.mapBookingCollectionToDto(bookingRepository.findAllByOwnerAndStateIsPast(owner,
-                        sort));
+                        pageable));
 
             case FUTURE:
                 return BookingMapper.mapBookingCollectionToDto(bookingRepository.findAllByOwnerAndStateIsFuture(owner,
-                        sort));
+                        pageable));
 
             case CURRENT:
                 return BookingMapper.mapBookingCollectionToDto(bookingRepository.findAllByOwnerAndStateIsCurrent(owner,
-                        sort));
+                        pageable));
 
             case WAITING:
                 return BookingMapper.mapBookingCollectionToDto(bookingRepository.findAllByItemOwnerAndStatus(owner,
-                        BookingStatus.WAITING, sort));
+                        BookingStatus.WAITING, pageable));
 
             case REJECTED:
                 return BookingMapper.mapBookingCollectionToDto(bookingRepository.findAllByItemOwnerAndStatus(owner,
-                        BookingStatus.REJECTED, sort));
+                        BookingStatus.REJECTED, pageable));
 
             default:
                 return new ArrayList<>();

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.IncomingItemDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.validation.CreateItemValidationGroup;
@@ -45,13 +46,13 @@ public class ItemController {
 
     @PostMapping
     public ItemDto createNewItem(@RequestHeader("X-Sharer-User-Id") long ownerId,
-                                 @Validated(CreateItemValidationGroup.class) @RequestBody ItemDto itemDto) {
+                                 @Validated(CreateItemValidationGroup.class) @RequestBody IncomingItemDto itemDto) {
         return itemService.createNewItem(ownerId, itemDto);
     }
 
     @PatchMapping("/{itemId}")
     public ItemDto updateItem(@RequestHeader("X-Sharer-User-Id") long ownerId, @PathVariable("itemId") long itemId,
-                              @Validated(UpdateItemValidationGroup.class) @RequestBody ItemDto itemDto) {
+                              @Validated(UpdateItemValidationGroup.class) @RequestBody IncomingItemDto itemDto) {
         itemDto.setId(itemId);
         return itemService.updateItem(itemDto, ownerId);
     }

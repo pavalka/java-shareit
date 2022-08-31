@@ -24,13 +24,6 @@ class ItemRequestTest {
     }
 
     @Test
-    void testEqualsReturnFalseWhenObjIsNull() {
-        var request = createRequest(1);
-
-        assertFalse(request.equals(null));
-    }
-
-    @Test
     void testEqualsReturnFalseWhenRequestIdIsNull() {
         var requestOne = createRequest(1);
         var requestTwo = createRequest(1);

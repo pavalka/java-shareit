@@ -13,6 +13,7 @@ import ru.practicum.shareit.item.CommentMapper;
 import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.IncomingItemDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.exceptions.BookingToCreateCommentNotFoundException;
 import ru.practicum.shareit.item.exceptions.ItemNotFoundException;
@@ -57,7 +58,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional
-    public ItemDto createNewItem(long ownerId, ItemDto itemDto) {
+    public ItemDto createNewItem(long ownerId, IncomingItemDto itemDto) {
         var owner = getUserById(ownerId);
         Item item;
 
@@ -73,7 +74,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional
-    public ItemDto updateItem(ItemDto itemDto, long userId) {
+    public ItemDto updateItem(IncomingItemDto itemDto, long userId) {
         var updatedItem = getItemById(itemDto.getId());
 
         if (updatedItem.getOwner().getId() != userId) {

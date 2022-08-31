@@ -39,7 +39,7 @@ public class ItemRequestMapper {
         return request;
     }
 
-    public static Collection<ItemRequestDto> mapToItemRequestDtoCollection(Collection<ItemRequest> requests) {
+    public static List<ItemRequestDto> mapToItemRequestDtoCollection(Collection<ItemRequest> requests) {
         if (requests == null) {
             return null;
         }

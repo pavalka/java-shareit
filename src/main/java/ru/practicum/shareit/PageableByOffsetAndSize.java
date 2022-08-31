@@ -65,7 +65,7 @@ public class PageableByOffsetAndSize implements Pageable {
 
     @Override
     public Pageable withPage(int pageNumber) {
-        return new PageableByOffsetAndSize(pageNumber * size, size, sort);
+        return new PageableByOffsetAndSize((long) pageNumber * size, size, sort);
     }
 
     @Override

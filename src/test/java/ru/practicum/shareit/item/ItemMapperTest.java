@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.IncomingItemDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.requests.ItemRequest;
 import ru.practicum.shareit.user.User;
@@ -57,7 +58,7 @@ class ItemMapperTest {
     @Test
     void mapItemDtoToItemReturnItem() {
         var user = createUser();
-        var itemDto = createItemDto();
+        var itemDto = createIncomingItemDto();
         var item = ItemMapper.mapItemDtoToItem(itemDto, user);
 
         assertEquals(itemDto.getId(), item.getId());
@@ -76,7 +77,7 @@ class ItemMapperTest {
     @Test
     void mapItemDtoToItemOverloadedReturnItemDto() {
         var owner = createUser();
-        var itemDto = createItemDto();
+        var itemDto = createIncomingItemDto();
         var requestAuthor = createUser();
         var request = createRequest(requestAuthor);
 
@@ -245,5 +246,16 @@ class ItemMapperTest {
         request.setDescription("description " + requestId);
         request.setAuthor(user);
         return request;
+    }
+
+    private IncomingItemDto createIncomingItemDto() {
+        var itemDto = new IncomingItemDto();
+        var itemId = getNextItemId();
+
+        itemDto.setId(itemId);
+        itemDto.setName("Item " + itemId);
+        itemDto.setDescription("Item description " + itemId);
+        itemDto.setAvailable(true);
+        return itemDto;
     }
 }

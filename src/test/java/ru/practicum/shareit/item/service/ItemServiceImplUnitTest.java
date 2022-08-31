@@ -15,6 +15,7 @@ import ru.practicum.shareit.item.Comment;
 import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.IncomingItemDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.exceptions.BookingToCreateCommentNotFoundException;
 import ru.practicum.shareit.item.exceptions.ItemNotFoundException;
@@ -116,7 +117,7 @@ class ItemServiceImplUnitTest {
                 .thenReturn(Optional.empty());
 
         var ex = assertThrows(UserNotFoundException.class,
-                () -> itemService.createNewItem(10, createItemDto()));
+                () -> itemService.createNewItem(10, createIncomingItemDto()));
 
         assertEquals(errMsg, ex.getMessage());
         Mockito.verify(itemRepository, Mockito.never()).save(Mockito.any(Item.class));
@@ -125,7 +126,7 @@ class ItemServiceImplUnitTest {
     @Test
     void createNewItemReturnItemDtoWhenRequestIdIsNull() {
         var itemOwner = createUser();
-        var inputItemDto = createItemDto();
+        var inputItemDto = createIncomingItemDto();
 
         Mockito.when(userRepository.findById(itemOwner.getId()))
                 .thenReturn(Optional.of(itemOwner));
@@ -153,7 +154,7 @@ class ItemServiceImplUnitTest {
     @Test
     void createNewItemReturnItemDtoWhenRequestIdIsNotNull() {
         var itemOwner = createUser();
-        var inputItemDto = createItemDto();
+        var inputItemDto = createIncomingItemDto();
         var requestAuthor = createUser();
         var request = createRequest(requestAuthor);
 
@@ -188,7 +189,7 @@ class ItemServiceImplUnitTest {
     @Test
     void createNewItemThrowsExceptionWhenRequestIdIsIllegal() {
         var itemOwner = createUser();
-        var inputItemDto = createItemDto();
+        var inputItemDto = createIncomingItemDto();
 
         inputItemDto.setRequestId(10L);
 
@@ -207,7 +208,7 @@ class ItemServiceImplUnitTest {
 
     @Test
     void updateItemThrowsExceptionWhenItemIdIsIllegal() {
-        var itemDto = createItemDto();
+        var itemDto = createIncomingItemDto();
 
         Mockito.when(itemRepository.findById(itemDto.getId()))
                 .thenReturn(Optional.empty());
@@ -220,7 +221,7 @@ class ItemServiceImplUnitTest {
 
     @Test
     void updateItemThrowsExceptionWhenUserIsNotItemOwner() {
-        var itemDto = createItemDto();
+        var itemDto = createIncomingItemDto();
         var itemOwner = createUser();
         var item = ItemMapper.mapItemDtoToItem(itemDto, itemOwner);
 
@@ -240,7 +241,7 @@ class ItemServiceImplUnitTest {
 
     @Test
     void updateItemUpdateNameWhenNameIsNotNull() {
-        var itemDto = createItemDto();
+        var itemDto = createIncomingItemDto();
         var itemOwner = createUser();
         var item = ItemMapper.mapItemDtoToItem(itemDto, itemOwner);
 
@@ -249,7 +250,7 @@ class ItemServiceImplUnitTest {
         Mockito.when(itemRepository.findById(itemDto.getId()))
                 .thenReturn(Optional.of(item));
 
-        var newItemDto = new ItemDto();
+        var newItemDto = new IncomingItemDto();
 
         newItemDto.setId(itemDto.getId());
         newItemDto.setName("New name");
@@ -268,7 +269,7 @@ class ItemServiceImplUnitTest {
 
     @Test
     void updateItemUpdateDescriptionWhenDescriptionIsNotNull() {
-        var itemDto = createItemDto();
+        var itemDto = createIncomingItemDto();
         var itemOwner = createUser();
         var item = ItemMapper.mapItemDtoToItem(itemDto, itemOwner);
 
@@ -277,7 +278,7 @@ class ItemServiceImplUnitTest {
         Mockito.when(itemRepository.findById(itemDto.getId()))
                 .thenReturn(Optional.of(item));
 
-        var newItemDto = new ItemDto();
+        var newItemDto = new IncomingItemDto();
 
         newItemDto.setId(itemDto.getId());
         newItemDto.setDescription("New description");
@@ -296,7 +297,7 @@ class ItemServiceImplUnitTest {
 
     @Test
     void updateItemUpdateAvailableWhenAvailableIsNotNull() {
-        var itemDto = createItemDto();
+        var itemDto = createIncomingItemDto();
         var itemOwner = createUser();
         var item = ItemMapper.mapItemDtoToItem(itemDto, itemOwner);
 
@@ -305,7 +306,7 @@ class ItemServiceImplUnitTest {
         Mockito.when(itemRepository.findById(itemDto.getId()))
                 .thenReturn(Optional.of(item));
 
-        var newItemDto = new ItemDto();
+        var newItemDto = new IncomingItemDto();
 
         newItemDto.setId(itemDto.getId());
         newItemDto.setAvailable(false);
@@ -593,5 +594,17 @@ class ItemServiceImplUnitTest {
         commentDto.setAuthorName(user.getName());
         commentDto.setText(text);
         return commentDto;
+    }
+
+
+    private IncomingItemDto createIncomingItemDto() {
+        var itemDto = new IncomingItemDto();
+        var itemId = getNextItemId();
+
+        itemDto.setId(itemId);
+        itemDto.setName("Item " + itemId);
+        itemDto.setDescription("Item description " + itemId);
+        itemDto.setAvailable(true);
+        return itemDto;
     }
 }

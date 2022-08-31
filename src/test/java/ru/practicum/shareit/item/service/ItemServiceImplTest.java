@@ -12,6 +12,7 @@ import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.Comment;
 import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.IncomingItemDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemDao;
@@ -80,7 +81,7 @@ class ItemServiceImplTest {
     @Test
     void createNewItem() {
         var user = userRepository.save(createUser());
-        var itemDto = createItemDto();
+        var itemDto = createIncomingItemDto();
 
         var createdItem = assertDoesNotThrow(() -> itemService.createNewItem(user.getId(), itemDto));
 
@@ -97,7 +98,7 @@ class ItemServiceImplTest {
     void updateItem() {
         var user = userRepository.save(createUser());
         var item = itemRepository.save(createItem(user, "Item 1", "description 1"));
-        var itemDto = createItemDto();
+        var itemDto = createIncomingItemDto();
 
         itemDto.setId(item.getId());
         itemDto.setAvailable(null);
@@ -258,5 +259,16 @@ class ItemServiceImplTest {
 
         commentDto.setText("Text of comment");
         return commentDto;
+    }
+
+    private IncomingItemDto createIncomingItemDto() {
+        var itemDto = new IncomingItemDto();
+        var itemId = getNextItemId();
+
+        itemDto.setId(itemId);
+        itemDto.setName("Item " + itemId);
+        itemDto.setDescription("Item description " + itemId);
+        itemDto.setAvailable(true);
+        return itemDto;
     }
 }

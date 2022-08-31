@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.item.dto.BookingInfoDto;
 import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.IncomingItemDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.exceptions.BookingToCreateCommentNotFoundException;
 import ru.practicum.shareit.item.exceptions.ItemNotFoundException;
@@ -171,10 +172,10 @@ class ItemControllerTest {
 
     @Test
     void createNewItemReturnStatus404WhenUserIdIsNotFound() throws Exception {
-        var itemDto = createItemDto("name", "description");
+        var itemDto = createIncomingItemDto("name", "description");
         var errMsg = "Пользователь с id = 10 не найден";
 
-        Mockito.when(itemService.createNewItem(Mockito.eq(10L), Mockito.any(ItemDto.class)))
+        Mockito.when(itemService.createNewItem(Mockito.eq(10L), Mockito.any(IncomingItemDto.class)))
                 .thenThrow(new UserNotFoundException(errMsg));
 
         mvc.perform(post("/items")
@@ -190,15 +191,16 @@ class ItemControllerTest {
     @Test
     void createNewItemReturnStatus200AndItem() throws Exception {
         var itemDto = createItemDto("Item", "description");
+        var incomingItemDto = createIncomingItemDto("Item", "description");
 
-        Mockito.when(itemService.createNewItem(Mockito.eq(1L), Mockito.any(ItemDto.class)))
+        Mockito.when(itemService.createNewItem(Mockito.eq(1L), Mockito.any(IncomingItemDto.class)))
                 .thenReturn(itemDto);
 
         mvc.perform(post("/items")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .header("X-Sharer-User-Id", 1)
-                        .content(mapper.writeValueAsString(itemDto)))
+                        .content(mapper.writeValueAsString(incomingItemDto)))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").value(itemDto.getId()))
@@ -271,10 +273,10 @@ class ItemControllerTest {
     @Test
     void updateItemReturnStatus404WhenItemIdIsInvalid() throws Exception {
         var errMsg = "Элемент с id = 10 не найден";
-        var itemDto = createItemDto("new name", null);
+        var itemDto = createIncomingItemDto("new name", null);
 
         itemDto.setAvailable(null);
-        Mockito.when(itemService.updateItem(Mockito.any(ItemDto.class), Mockito.eq(1L)))
+        Mockito.when(itemService.updateItem(Mockito.any(IncomingItemDto.class), Mockito.eq(1L)))
                 .thenThrow(new ItemNotFoundException(errMsg));
 
         mvc.perform(patch("/items/10")
@@ -289,11 +291,11 @@ class ItemControllerTest {
 
     @Test
     void updateItemReturnStatus404WhenUserIsNotItemOwner() throws Exception {
-        var itemDto = createItemDto("new name", null);
+        var itemDto = createIncomingItemDto("new name", null);
         var errMsg = "Пользователь с id = 1 не владелец элемента с id = 10";
 
         itemDto.setAvailable(null);
-        Mockito.when(itemService.updateItem(Mockito.any(ItemDto.class), Mockito.eq(1L)))
+        Mockito.when(itemService.updateItem(Mockito.any(IncomingItemDto.class), Mockito.eq(1L)))
                 .thenThrow(new UserIsNotItemOwnerException(errMsg));
 
         mvc.perform(patch("/items/10")
@@ -312,7 +314,7 @@ class ItemControllerTest {
         var newItemDto = createItemDto("item", null);
 
         newItemDto.setAvailable(null);
-        Mockito.when(itemService.updateItem(Mockito.any(ItemDto.class), Mockito.eq(1L)))
+        Mockito.when(itemService.updateItem(Mockito.any(IncomingItemDto.class), Mockito.eq(1L)))
                 .thenReturn(itemDto);
 
         mvc.perform(patch("/items/1")
@@ -482,6 +484,16 @@ class ItemControllerTest {
         itemDto.setDescription(description);
         itemDto.setAvailable(true);
         itemDto.setComments(new ArrayList<>());
+        return itemDto;
+    }
+
+    private IncomingItemDto createIncomingItemDto(String name, String description) {
+        var itemDto = new IncomingItemDto();
+
+        itemDto.setId(getNextItemId());
+        itemDto.setName(name);
+        itemDto.setDescription(description);
+        itemDto.setAvailable(true);
         return itemDto;
     }
 

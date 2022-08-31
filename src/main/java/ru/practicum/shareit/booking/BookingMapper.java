@@ -9,8 +9,8 @@ import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserMapper;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -32,11 +32,11 @@ public class BookingMapper {
         return bookingDto;
     }
 
-    public static Collection<BookingOutgoingDto> mapBookingCollectionToDto(Collection<Booking> bookings) {
+    public static List<BookingOutgoingDto> mapBookingCollectionToDto(Collection<Booking> bookings) {
         if (bookings == null) {
             return null;
         }
-        return bookings.stream().map(BookingMapper::mapBookingToDto).collect(Collectors.toCollection(ArrayList::new));
+        return bookings.stream().map(BookingMapper::mapBookingToDto).collect(Collectors.toList());
     }
 
     public static Booking mapDtoToBooking(BookingIncomingDto bookingDto, Item item, User user) {

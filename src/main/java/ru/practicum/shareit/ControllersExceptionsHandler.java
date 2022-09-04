@@ -9,7 +9,6 @@ import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.MissingRequestValueException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -22,8 +21,10 @@ import ru.practicum.shareit.booking.exceptions.ItemBookedByItsOwnerException;
 import ru.practicum.shareit.item.exceptions.BookingToCreateCommentNotFoundException;
 import ru.practicum.shareit.item.exceptions.ItemNotFoundException;
 import ru.practicum.shareit.item.exceptions.UserIsNotItemOwnerException;
+import ru.practicum.shareit.requests.exceptions.RequestNotFoundException;
 import ru.practicum.shareit.user.exceptions.UserNotFoundException;
 
+import javax.validation.ConstraintViolationException;
 import java.util.Map;
 
 @RestControllerAdvice
@@ -45,18 +46,24 @@ public class ControllersExceptionsHandler {
     }
 
     @ExceptionHandler({UserNotFoundException.class, ItemNotFoundException.class, UserIsNotItemOwnerException.class,
-                       ItemBookedByItsOwnerException.class, BookingNotFoundException.class})
+                       ItemBookedByItsOwnerException.class, BookingNotFoundException.class,
+                       RequestNotFoundException.class})
     public ResponseEntity<Map<String, String>> handleNotFoundExceptions(RuntimeException ex) {
         logWarn(ex);
         return new ResponseEntity<>(Map.of("error", ex.getMessage()), HttpStatus.NOT_FOUND);
     }
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({MethodArgumentNotValidException.class})
     public ResponseEntity<Map<String, String>> handleValidationException(MethodArgumentNotValidException ex) {
         logWarn(ex);
-        return new ResponseEntity<>(Map.of("error", "Field " + ex.getFieldError().getField() + "has an invalid value"),
+        return new ResponseEntity<>(Map.of("error", "Field " + ex.getFieldError().getField() + " has an invalid value"),
                 HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler({ConstraintViolationException.class})
+    public ResponseEntity<Map<String, String>> handleConstraintViolationException(ConstraintViolationException ex) {
+        logWarn(ex);
+        return new ResponseEntity<>(Map.of("error", ex.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler({DataIntegrityViolationException.class})

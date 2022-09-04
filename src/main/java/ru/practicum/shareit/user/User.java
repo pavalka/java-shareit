@@ -3,6 +3,7 @@ package ru.practicum.shareit.user;
 import lombok.Getter;
 import lombok.Setter;
 import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.requests.ItemRequest;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -35,6 +36,10 @@ public class User {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "owner")
     @OrderBy("id ASC")
     private List<Item> items;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "author")
+    @OrderBy("created DESC")
+    private List<ItemRequest> requests;
 
     @Override
     public int hashCode() {

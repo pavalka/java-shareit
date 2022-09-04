@@ -5,8 +5,8 @@ import lombok.NoArgsConstructor;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.user.User;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -25,11 +25,11 @@ public class CommentMapper {
         return commentDto;
     }
 
-    public static Collection<CommentDto> mapCommentsToDto(Collection<Comment> comments) {
+    public static List<CommentDto> mapCommentsToDto(Collection<Comment> comments) {
         if (comments == null) {
             return null;
         }
-        return comments.stream().map(CommentMapper::mapCommentToDto).collect(Collectors.toCollection(ArrayList::new));
+        return comments.stream().map(CommentMapper::mapCommentToDto).collect(Collectors.toList());
     }
 
     public static Comment mapDtoToComment(CommentDto commentDto, Item item, User user) {

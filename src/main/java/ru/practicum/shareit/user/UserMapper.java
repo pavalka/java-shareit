@@ -2,7 +2,6 @@ package ru.practicum.shareit.user;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import java.util.ArrayList;
@@ -11,7 +10,11 @@ import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class UserMapper {
-    public static UserDto mapUserToUserDto(@NonNull User user) {
+    public static UserDto mapUserToUserDto(User user) {
+        if (user == null) {
+            return null;
+        }
+
         var userDto = new UserDto();
 
         userDto.setId(user.getId());
@@ -20,7 +23,11 @@ public class UserMapper {
         return userDto;
     }
 
-    public static User mapUserDtoToUser(@NonNull UserDto userDto) {
+    public static User mapUserDtoToUser(UserDto userDto) {
+        if (userDto == null) {
+            return null;
+        }
+
         var user = new User();
 
         user.setId(userDto.getId());
@@ -29,7 +36,11 @@ public class UserMapper {
         return user;
     }
 
-    public static Collection<UserDto> mapUserCollectionToUserDto(@NonNull Collection<User> users) {
+    public static Collection<UserDto> mapUserCollectionToUserDto(Collection<User> users) {
+        if (users == null) {
+            return null;
+        }
+
         return users.stream().map(UserMapper::mapUserToUserDto).collect(Collectors.toCollection(ArrayList::new));
     }
 }

@@ -2,7 +2,6 @@ package ru.practicum.shareit.booking;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 import ru.practicum.shareit.booking.dto.BookingIncomingDto;
 import ru.practicum.shareit.booking.dto.BookingOutgoingDto;
 import ru.practicum.shareit.item.Item;
@@ -10,13 +9,17 @@ import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserMapper;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BookingMapper {
-    public static BookingOutgoingDto mapBookingToDto(@NonNull Booking booking) {
+    public static BookingOutgoingDto mapBookingToDto(Booking booking) {
+        if (booking == null) {
+            return null;
+        }
+
         var bookingDto = new BookingOutgoingDto();
 
         bookingDto.setId(booking.getId());
@@ -29,8 +32,11 @@ public class BookingMapper {
         return bookingDto;
     }
 
-    public static Collection<BookingOutgoingDto> mapBookingCollectionToDto(@NonNull Collection<Booking> bookings) {
-        return bookings.stream().map(BookingMapper::mapBookingToDto).collect(Collectors.toCollection(ArrayList::new));
+    public static List<BookingOutgoingDto> mapBookingCollectionToDto(Collection<Booking> bookings) {
+        if (bookings == null) {
+            return null;
+        }
+        return bookings.stream().map(BookingMapper::mapBookingToDto).collect(Collectors.toList());
     }
 
     public static Booking mapDtoToBooking(BookingIncomingDto bookingDto, Item item, User user) {

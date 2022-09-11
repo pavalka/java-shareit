@@ -9,8 +9,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingState;
 import ru.practicum.shareit.booking.BookingStatus;
-import ru.practicum.shareit.booking.dto.BookingIncomingDto;
-import ru.practicum.shareit.booking.dto.BookingOutgoingDto;
+import ru.practicum.shareit.booking.dto.BookingRequestDto;
+import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.repository.ItemDao;
@@ -81,7 +81,7 @@ class BookingServiceImplTest {
         bookingRepository.save(createBooking(bookingAuthorOne, itemOne, LocalDateTime.now().plusDays(5)));
 
         var result = assertDoesNotThrow(() -> bookingService.getAllBookingsByUserAndState(bookingAuthorOne.getId(),
-                BookingState.CURRENT, 0, 3).toArray(new BookingOutgoingDto[1]));
+                BookingState.CURRENT, 0, 3).toArray(new BookingDto[1]));
 
         assertEquals(2, result.length);
         assertEquals(bookingTwo.getId(), result[0].getId());
@@ -125,7 +125,7 @@ class BookingServiceImplTest {
         bookingRepository.save(createBooking(bookingAuthorOne, itemOne, LocalDateTime.now().plusDays(5)));
 
         var result = assertDoesNotThrow(() -> bookingService.getAllBookingsByOwnerAndState(itemOwnerOne.getId(),
-                BookingState.CURRENT, 0, 4).toArray(new BookingOutgoingDto[1]));
+                BookingState.CURRENT, 0, 4).toArray(new BookingDto[1]));
 
         assertEquals(2, result.length);
         assertEquals(bookingTwo.getId(), result[0].getId());
@@ -240,8 +240,8 @@ class BookingServiceImplTest {
         return booking;
     }
 
-    private BookingIncomingDto createIncomingBookingDto(long itemId, LocalDateTime startTime) {
-        var bookingDto = new BookingIncomingDto();
+    private BookingRequestDto createIncomingBookingDto(long itemId, LocalDateTime startTime) {
+        var bookingDto = new BookingRequestDto();
 
         bookingDto.setItemId(itemId);
         bookingDto.setStart(startTime);

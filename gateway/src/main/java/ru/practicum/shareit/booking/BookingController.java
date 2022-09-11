@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.shareit.booking.dto.BookingIncomingDto;
+import ru.practicum.shareit.booking.dto.BookingRequestDto;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
@@ -28,7 +28,7 @@ public class BookingController {
 
     @PostMapping
     public ResponseEntity<Object> createNewBooking(@RequestHeader("X-Sharer-User-Id") long userId,
-                                                   @Valid @RequestBody BookingIncomingDto bookingDto) {
+                                                   @Valid @RequestBody BookingRequestDto bookingDto) {
         return bookingClient.createBooking(userId, bookingDto);
     }
 

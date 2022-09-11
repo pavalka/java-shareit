@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-public class BookingOutgoingDto {
+public class BookingDto {
     private Long id;
 
     private ItemDto item;

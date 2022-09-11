@@ -11,8 +11,8 @@ import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.BookingState;
 import ru.practicum.shareit.booking.BookingStatus;
-import ru.practicum.shareit.booking.dto.BookingIncomingDto;
-import ru.practicum.shareit.booking.dto.BookingOutgoingDto;
+import ru.practicum.shareit.booking.dto.BookingRequestDto;
+import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.exceptions.BookingNotAvailableItemException;
 import ru.practicum.shareit.booking.exceptions.BookingNotFoundException;
 import ru.practicum.shareit.booking.exceptions.BookingTimeConflictsException;
@@ -38,7 +38,7 @@ public class BookingServiceImpl implements BookingService {
     private final UserDao userDao;
 
     @Override
-    public BookingOutgoingDto getBookingById(long userId, long bookingId) {
+    public BookingDto getBookingById(long userId, long bookingId) {
         var user = getUserById(userId);
         var booking = bookingRepository.findByIdAndUserOrOwner(bookingId, user).orElseThrow(() ->
                 new BookingNotFoundException(String.format("Бронирование с id = %d для пользователя с id = %d " +
@@ -48,10 +48,10 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Collection<BookingOutgoingDto> getAllBookingsByUserAndState(long userId,
-                                                                       @NonNull BookingState bookingState,
-                                                                       long from,
-                                                                       int size) {
+    public Collection<BookingDto> getAllBookingsByUserAndState(long userId,
+                                                               @NonNull BookingState bookingState,
+                                                               long from,
+                                                               int size) {
         var user = getUserById(userId);
         var pageable = new PageableByOffsetAndSize(from, size, Sort.by(Sort.Direction.DESC, "startTime"));
 
@@ -85,9 +85,9 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Collection<BookingOutgoingDto> getAllBookingsByOwnerAndState(long ownerId,
-                                                                        @NonNull BookingState bookingState,
-                                                                        long from, int size) {
+    public Collection<BookingDto> getAllBookingsByOwnerAndState(long ownerId,
+                                                                @NonNull BookingState bookingState,
+                                                                long from, int size) {
         var owner = getUserById(ownerId);
         var pageable = new PageableByOffsetAndSize(from, size, Sort.by(Sort.Direction.DESC, "startTime"));
 
@@ -122,7 +122,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public BookingOutgoingDto createBooking(long userId, @NonNull BookingIncomingDto bookingDto) {
+    public BookingDto createBooking(long userId, @NonNull BookingRequestDto bookingDto) {
         var user = getUserById(userId);
         var item = getItemById(bookingDto.getItemId());
         var booking = BookingMapper.mapDtoToBooking(bookingDto, item, user);
@@ -144,7 +144,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public BookingOutgoingDto setBookingStatus(long ownerId, long bookingId, boolean approved) {
+    public BookingDto setBookingStatus(long ownerId, long bookingId, boolean approved) {
         var owner = getUserById(ownerId);
         var booking = bookingRepository.findByIdAndItemOwner(bookingId, owner).orElseThrow(() ->
                 new BookingNotFoundException(String.format("Бронирование с id = %d и владельцем с id = %d не найдено",

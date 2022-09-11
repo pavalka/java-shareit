@@ -69,24 +69,6 @@ class ItemRequestControllerTest {
                 .andExpect(jsonPath("$.items", IsNull.nullValue()));
     }
 
-//    @Test
-//    void createNewRequestReturnStatus400WhenDescriptionIsEmpty() throws Exception {
-//        var requestDto = createRequestDto(1);
-//        requestDto.setDescription("");
-//
-//        Mockito.when(requestService.createNewRequest(Mockito.anyLong(), Mockito.any(ItemRequestDto.class)))
-//                .thenReturn(createFilledRequestDto(1));
-//
-//        mvc.perform(post("/requests")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .accept(MediaType.APPLICATION_JSON)
-//                        .header("X-Sharer-User-Id", 1L)
-//                        .content(mapper.writeValueAsString(requestDto)))
-//                .andExpect(status().isBadRequest())
-//                .andExpect(jsonPath("$.error", StringContains.containsString("has an invalid value")));
-//    }
-
-
     @Test
     void getAllRequestsByUserReturnStatus404WhenUserIdIsInvalid() throws Exception {
         var errMsg = "Пользователь с id = 10 не найден";
@@ -165,34 +147,6 @@ class ItemRequestControllerTest {
                         .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
                 .andExpect(jsonPath("$[0].items", IsNull.nullValue()));
     }
-
-//    @Test
-//    void getAllRequestsPageableReturnStatus400WhenFromIsInvalid() throws Exception {
-//        var requestDtoTwo = createFilledRequestDto(2);
-//
-//        Mockito.when(requestService.getAllRequestsPageable(1, -1, 1)).thenReturn(List.of(requestDtoTwo));
-//
-//        mvc.perform(get("/requests/all?from=-1&size=2")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .accept(MediaType.APPLICATION_JSON)
-//                        .header("X-Sharer-User-Id", 10L))
-//                .andExpect(status().isBadRequest())
-//                .andExpect(jsonPath("$.error", IsNull.notNullValue()));
-//    }
-
-//    @Test
-//    void getAllRequestsPageableReturnStatus400WhenSizeIsInvalid() throws Exception {
-//        var requestDtoTwo = createFilledRequestDto(2);
-//
-//        Mockito.when(requestService.getAllRequestsPageable(1, 0, 0)).thenReturn(List.of(requestDtoTwo));
-//
-//        mvc.perform(get("/requests/all?from=0&size=0")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .accept(MediaType.APPLICATION_JSON)
-//                        .header("X-Sharer-User-Id", 10L))
-//                .andExpect(status().isBadRequest())
-//                .andExpect(jsonPath("$.error", IsNull.notNullValue()));
-//    }
 
     @Test
     void getRequestByIdReturnStatus404WhenUserIdIsInvalid() throws Exception {

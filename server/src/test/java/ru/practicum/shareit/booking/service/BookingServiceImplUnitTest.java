@@ -10,8 +10,8 @@ import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingState;
 import ru.practicum.shareit.booking.BookingStatus;
-import ru.practicum.shareit.booking.dto.BookingIncomingDto;
-import ru.practicum.shareit.booking.dto.BookingOutgoingDto;
+import ru.practicum.shareit.booking.dto.BookingRequestDto;
+import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.exceptions.BookingNotAvailableItemException;
 import ru.practicum.shareit.booking.exceptions.BookingNotFoundException;
 import ru.practicum.shareit.booking.exceptions.BookingTimeConflictsException;
@@ -130,7 +130,7 @@ class BookingServiceImplUnitTest {
                 .thenReturn(List.of(booking));
 
         var bookingDto = assertDoesNotThrow(() -> bookingService.getAllBookingsByUserAndState(bookingAuthor.getId(),
-                BookingState.ALL, 0, 2).toArray(new BookingOutgoingDto[1]));
+                BookingState.ALL, 0, 2).toArray(new BookingDto[1]));
 
         assertEquals(booking.getId(), bookingDto[0].getId());
         assertEquals(item.getId(), bookingDto[0].getItem().getId());
@@ -167,7 +167,7 @@ class BookingServiceImplUnitTest {
                 .thenReturn(List.of(booking));
 
         var bookingDto = assertDoesNotThrow(() -> bookingService.getAllBookingsByUserAndState(bookingAuthor.getId(),
-                BookingState.PAST, 0, 2).toArray(new BookingOutgoingDto[1]));
+                BookingState.PAST, 0, 2).toArray(new BookingDto[1]));
 
         assertEquals(booking.getId(), bookingDto[0].getId());
         assertEquals(item.getId(), bookingDto[0].getItem().getId());
@@ -204,7 +204,7 @@ class BookingServiceImplUnitTest {
                 .thenReturn(List.of(booking));
 
         var bookingDto = assertDoesNotThrow(() -> bookingService.getAllBookingsByUserAndState(bookingAuthor.getId(),
-                BookingState.FUTURE, 0, 2).toArray(new BookingOutgoingDto[1]));
+                BookingState.FUTURE, 0, 2).toArray(new BookingDto[1]));
 
         assertEquals(booking.getId(), bookingDto[0].getId());
         assertEquals(item.getId(), bookingDto[0].getItem().getId());
@@ -241,7 +241,7 @@ class BookingServiceImplUnitTest {
                 .thenReturn(List.of(booking));
 
         var bookingDto = assertDoesNotThrow(() -> bookingService.getAllBookingsByUserAndState(bookingAuthor.getId(),
-                BookingState.CURRENT, 0, 2).toArray(new BookingOutgoingDto[1]));
+                BookingState.CURRENT, 0, 2).toArray(new BookingDto[1]));
 
         assertEquals(booking.getId(), bookingDto[0].getId());
         assertEquals(item.getId(), bookingDto[0].getItem().getId());
@@ -278,7 +278,7 @@ class BookingServiceImplUnitTest {
                 .thenReturn(List.of(booking));
 
         var bookingDto = assertDoesNotThrow(() -> bookingService.getAllBookingsByUserAndState(bookingAuthor.getId(),
-                BookingState.WAITING, 0, 2).toArray(new BookingOutgoingDto[1]));
+                BookingState.WAITING, 0, 2).toArray(new BookingDto[1]));
 
         assertEquals(booking.getId(), bookingDto[0].getId());
         assertEquals(item.getId(), bookingDto[0].getItem().getId());
@@ -315,7 +315,7 @@ class BookingServiceImplUnitTest {
                 .thenReturn(List.of(booking));
 
         var bookingDto = assertDoesNotThrow(() -> bookingService.getAllBookingsByUserAndState(bookingAuthor.getId(),
-                BookingState.REJECTED, 0, 2).toArray(new BookingOutgoingDto[1]));
+                BookingState.REJECTED, 0, 2).toArray(new BookingDto[1]));
 
         assertEquals(booking.getId(), bookingDto[0].getId());
         assertEquals(item.getId(), bookingDto[0].getItem().getId());
@@ -363,7 +363,7 @@ class BookingServiceImplUnitTest {
                 .thenReturn(List.of(booking));
 
         var bookingDto = assertDoesNotThrow(() -> bookingService.getAllBookingsByOwnerAndState(bookingAuthor.getId(),
-                BookingState.ALL, 0, 2).toArray(new BookingOutgoingDto[1]));
+                BookingState.ALL, 0, 2).toArray(new BookingDto[1]));
 
         assertEquals(booking.getId(), bookingDto[0].getId());
         assertEquals(item.getId(), bookingDto[0].getItem().getId());
@@ -400,7 +400,7 @@ class BookingServiceImplUnitTest {
                 .thenReturn(List.of(booking));
 
         var bookingDto = assertDoesNotThrow(() -> bookingService.getAllBookingsByOwnerAndState(bookingAuthor.getId(),
-                BookingState.PAST, 0, 2).toArray(new BookingOutgoingDto[1]));
+                BookingState.PAST, 0, 2).toArray(new BookingDto[1]));
 
         assertEquals(booking.getId(), bookingDto[0].getId());
         assertEquals(item.getId(), bookingDto[0].getItem().getId());
@@ -437,7 +437,7 @@ class BookingServiceImplUnitTest {
                 .thenReturn(List.of(booking));
 
         var bookingDto = assertDoesNotThrow(() -> bookingService.getAllBookingsByOwnerAndState(bookingAuthor.getId(),
-                BookingState.FUTURE, 0, 2).toArray(new BookingOutgoingDto[1]));
+                BookingState.FUTURE, 0, 2).toArray(new BookingDto[1]));
 
         assertEquals(booking.getId(), bookingDto[0].getId());
         assertEquals(item.getId(), bookingDto[0].getItem().getId());
@@ -474,7 +474,7 @@ class BookingServiceImplUnitTest {
                 .thenReturn(List.of(booking));
 
         var bookingDto = assertDoesNotThrow(() -> bookingService.getAllBookingsByOwnerAndState(bookingAuthor.getId(),
-                BookingState.CURRENT, 0, 2).toArray(new BookingOutgoingDto[1]));
+                BookingState.CURRENT, 0, 2).toArray(new BookingDto[1]));
 
         assertEquals(booking.getId(), bookingDto[0].getId());
         assertEquals(item.getId(), bookingDto[0].getItem().getId());
@@ -511,7 +511,7 @@ class BookingServiceImplUnitTest {
                 .thenReturn(List.of(booking));
 
         var bookingDto = assertDoesNotThrow(() -> bookingService.getAllBookingsByOwnerAndState(bookingAuthor.getId(),
-                BookingState.WAITING, 0, 2).toArray(new BookingOutgoingDto[1]));
+                BookingState.WAITING, 0, 2).toArray(new BookingDto[1]));
 
         assertEquals(booking.getId(), bookingDto[0].getId());
         assertEquals(item.getId(), bookingDto[0].getItem().getId());
@@ -548,7 +548,7 @@ class BookingServiceImplUnitTest {
                 .thenReturn(List.of(booking));
 
         var bookingDto = assertDoesNotThrow(() -> bookingService.getAllBookingsByOwnerAndState(bookingAuthor.getId(),
-                BookingState.REJECTED, 0, 2).toArray(new BookingOutgoingDto[1]));
+                BookingState.REJECTED, 0, 2).toArray(new BookingDto[1]));
 
         assertEquals(booking.getId(), bookingDto[0].getId());
         assertEquals(item.getId(), bookingDto[0].getItem().getId());
@@ -883,8 +883,8 @@ class BookingServiceImplUnitTest {
         return booking;
     }
 
-    private BookingIncomingDto createIncomingBookingDto(long itemId, LocalDateTime startTime) {
-        var bookingDto = new BookingIncomingDto();
+    private BookingRequestDto createIncomingBookingDto(long itemId, LocalDateTime startTime) {
+        var bookingDto = new BookingRequestDto();
 
         bookingDto.setItemId(itemId);
         bookingDto.setStart(startTime);

@@ -1,8 +1,8 @@
 package ru.practicum.shareit.booking;
 
 import org.junit.jupiter.api.Test;
-import ru.practicum.shareit.booking.dto.BookingIncomingDto;
-import ru.practicum.shareit.booking.dto.BookingOutgoingDto;
+import ru.practicum.shareit.booking.dto.BookingRequestDto;
+import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.user.User;
 
@@ -60,7 +60,7 @@ class BookingMapperTest {
         var booking = createBooking(bookingAuthor, item, created);
 
         var bookingDto = assertDoesNotThrow(
-                () -> BookingMapper.mapBookingCollectionToDto(List.of(booking)).toArray(new BookingOutgoingDto[1]));
+                () -> BookingMapper.mapBookingCollectionToDto(List.of(booking)).toArray(new BookingDto[1]));
 
         assertEquals(1, bookingDto.length);
         assertEquals(booking.getId(), bookingDto[0].getId());
@@ -147,8 +147,8 @@ class BookingMapperTest {
         return booking;
     }
 
-    private BookingIncomingDto createIncomingBookingDto(long itemId, LocalDateTime startTime) {
-        var bookingDto = new BookingIncomingDto();
+    private BookingRequestDto createIncomingBookingDto(long itemId, LocalDateTime startTime) {
+        var bookingDto = new BookingRequestDto();
 
         bookingDto.setItemId(itemId);
         bookingDto.setStart(startTime);

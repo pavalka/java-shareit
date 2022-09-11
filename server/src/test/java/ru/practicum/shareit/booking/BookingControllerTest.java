@@ -10,8 +10,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.practicum.shareit.booking.dto.BookingIncomingDto;
-import ru.practicum.shareit.booking.dto.BookingOutgoingDto;
+import ru.practicum.shareit.booking.dto.BookingRequestDto;
+import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.exceptions.BookingNotFoundException;
 import ru.practicum.shareit.booking.exceptions.BookingTimeConflictsException;
 import ru.practicum.shareit.booking.exceptions.IllegalBookingApproveException;
@@ -51,7 +51,7 @@ class BookingControllerTest {
         var incomingBookingDto = createIncomingBookingDto(item.getId(), creatingTime);
 
         Mockito.when(bookingService.createBooking(Mockito.eq(bookingAuthor.getId()),
-                Mockito.any(BookingIncomingDto.class)))
+                Mockito.any(BookingRequestDto.class)))
                 .thenReturn(outgoingBookingDto);
 
         mvc.perform(post("/bookings")
@@ -86,7 +86,7 @@ class BookingControllerTest {
         var creatingTime = LocalDateTime.now().plusHours(1);
         var incomingBookingDto = createIncomingBookingDto(1L, creatingTime);
 
-        Mockito.when(bookingService.createBooking(Mockito.eq(1L), Mockito.any(BookingIncomingDto.class)))
+        Mockito.when(bookingService.createBooking(Mockito.eq(1L), Mockito.any(BookingRequestDto.class)))
                         .thenThrow(new UserNotFoundException(errMsg));
         mvc.perform(post("/bookings")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -104,7 +104,7 @@ class BookingControllerTest {
         var creatingTime = LocalDateTime.now().plusHours(1);
         var incomingBookingDto = createIncomingBookingDto(1L, creatingTime);
 
-        Mockito.when(bookingService.createBooking(Mockito.eq(1L), Mockito.any(BookingIncomingDto.class)))
+        Mockito.when(bookingService.createBooking(Mockito.eq(1L), Mockito.any(BookingRequestDto.class)))
                         .thenThrow(new ItemNotFoundException(errMsg));
         mvc.perform(post("/bookings")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -122,7 +122,7 @@ class BookingControllerTest {
         var creatingTime = LocalDateTime.now().plusHours(1);
         var incomingBookingDto = createIncomingBookingDto(1L, creatingTime);
 
-        Mockito.when(bookingService.createBooking(Mockito.eq(1L), Mockito.any(BookingIncomingDto.class)))
+        Mockito.when(bookingService.createBooking(Mockito.eq(1L), Mockito.any(BookingRequestDto.class)))
                         .thenThrow(new ItemBookedByItsOwnerException(errMsg));
         mvc.perform(post("/bookings")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -140,7 +140,7 @@ class BookingControllerTest {
         var creatingTime = LocalDateTime.now().plusHours(1);
         var incomingBookingDto = createIncomingBookingDto(1L, creatingTime);
 
-        Mockito.when(bookingService.createBooking(Mockito.eq(1L), Mockito.any(BookingIncomingDto.class)))
+        Mockito.when(bookingService.createBooking(Mockito.eq(1L), Mockito.any(BookingRequestDto.class)))
                         .thenThrow(new ItemBookedByItsOwnerException(errMsg));
         mvc.perform(post("/bookings")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -158,7 +158,7 @@ class BookingControllerTest {
         var creatingTime = LocalDateTime.now().plusHours(1);
         var incomingBookingDto = createIncomingBookingDto(1L, creatingTime);
 
-        Mockito.when(bookingService.createBooking(Mockito.eq(1L), Mockito.any(BookingIncomingDto.class)))
+        Mockito.when(bookingService.createBooking(Mockito.eq(1L), Mockito.any(BookingRequestDto.class)))
                         .thenThrow(new BookingTimeConflictsException(errMsg));
         mvc.perform(post("/bookings")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -374,7 +374,7 @@ class BookingControllerTest {
         return user;
     }
 
-    private BookingOutgoingDto createOutgoingBookingDto(User author, Item item, LocalDateTime start) {
+    private BookingDto createOutgoingBookingDto(User author, Item item, LocalDateTime start) {
         var booking = new Booking();
         var bookingId = getNextId();
 
@@ -387,8 +387,8 @@ class BookingControllerTest {
         return BookingMapper.mapBookingToDto(booking);
     }
 
-    private BookingIncomingDto createIncomingBookingDto(Long itemId, LocalDateTime startTime) {
-        var bookingDto = new BookingIncomingDto();
+    private BookingRequestDto createIncomingBookingDto(Long itemId, LocalDateTime startTime) {
+        var bookingDto = new BookingRequestDto();
 
         bookingDto.setItemId(itemId);
         bookingDto.setStart(startTime);

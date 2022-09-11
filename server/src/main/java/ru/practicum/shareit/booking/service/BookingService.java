@@ -2,21 +2,21 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.NonNull;
 import ru.practicum.shareit.booking.BookingState;
-import ru.practicum.shareit.booking.dto.BookingIncomingDto;
-import ru.practicum.shareit.booking.dto.BookingOutgoingDto;
+import ru.practicum.shareit.booking.dto.BookingRequestDto;
+import ru.practicum.shareit.booking.dto.BookingDto;
 
 import java.util.Collection;
 
 public interface BookingService {
-    BookingOutgoingDto getBookingById(long userId, long bookingId);
+    BookingDto getBookingById(long userId, long bookingId);
 
-    Collection<BookingOutgoingDto> getAllBookingsByUserAndState(long userId, @NonNull BookingState bookingState,
-                                                                long from, int size);
+    Collection<BookingDto> getAllBookingsByUserAndState(long userId, @NonNull BookingState bookingState,
+                                                        long from, int size);
 
-    Collection<BookingOutgoingDto> getAllBookingsByOwnerAndState(long ownerId, @NonNull BookingState bookingState,
-                                                                 long from, int size);
+    Collection<BookingDto> getAllBookingsByOwnerAndState(long ownerId, @NonNull BookingState bookingState,
+                                                         long from, int size);
 
-    BookingOutgoingDto createBooking(long userId, @NonNull BookingIncomingDto bookingDto);
+    BookingDto createBooking(long userId, @NonNull BookingRequestDto bookingDto);
 
-    BookingOutgoingDto setBookingStatus(long ownerId, long bookingId, boolean approved);
+    BookingDto setBookingStatus(long ownerId, long bookingId, boolean approved);
 }
